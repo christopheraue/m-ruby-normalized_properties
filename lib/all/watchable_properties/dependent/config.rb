@@ -4,7 +4,6 @@ module WatchableProperties
       def initialize(owner, name, type, config)
         super owner, name,
           property_class: Dependent.const_get(type),
-          database_property?: config.fetch(:database_property?, true),
           filter: config.fetch(:filter),
           model_name: config[:model]
 
