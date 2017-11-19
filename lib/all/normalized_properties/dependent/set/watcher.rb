@@ -8,7 +8,7 @@ module NormalizedProperties
 
         def watch
           if @watchers
-            raise "already watching"
+            raise Error, "already watching"
           else
             @value = @set.reload_value
             @watchers = @set.source_properties.map do |source_prop|

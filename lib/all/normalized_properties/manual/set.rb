@@ -11,7 +11,7 @@ module NormalizedProperties
         if filter.empty?
           self
         else
-          raise 'manual set not filterable'
+          raise Error, 'manual set not filterable'
         end
       end
     end

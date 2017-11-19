@@ -5,7 +5,7 @@ module NormalizedProperties
       @properties[name] ||= if config = self.class.property_config(name)
                               config.to_property_for self
                             else
-                              raise "property #{name.inspect} does not exist"
+                              raise Error, "property #{name.inspect} does not exist"
                             end
     end
   end
@@ -25,7 +25,7 @@ module NormalizedProperties
     namespace = if NormalizedProperties.const_defined? namespace_name
                   NormalizedProperties.const_get namespace_name
                 else
-                  raise "unknown attribute type #{namespace_name.inspect}"
+                  raise Error, "unknown attribute type #{namespace_name.inspect}"
                 end
 
     @property_configs[name] = namespace::Config.new(self, name, 'Attribute', config)
@@ -36,7 +36,7 @@ module NormalizedProperties
     namespace = if NormalizedProperties.const_defined? namespace_name
                   NormalizedProperties.const_get namespace_name
                 else
-                  raise "unknown set type #{namespace_name.inspect}"
+                  raise Error, "unknown set type #{namespace_name.inspect}"
                 end
 
     @property_configs[name] = namespace::Config.new(self, name, 'Set', config)
