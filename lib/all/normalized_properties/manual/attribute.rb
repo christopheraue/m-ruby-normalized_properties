@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   module Manual
     class Attribute < Attribute
       EVENTS_TRIGGERED_BY_WATCHER = false

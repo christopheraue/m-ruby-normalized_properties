@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   class Attribute < Property
     def set?
       false

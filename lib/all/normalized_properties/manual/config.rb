@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   module Manual
     class Config < PropertyConfig
       def initialize(owner, name, type, config)

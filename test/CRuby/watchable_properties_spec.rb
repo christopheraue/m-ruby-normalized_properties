@@ -1,3 +1,0 @@
-describe WatchableProperties do
-
-end

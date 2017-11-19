@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   class Property
     include CallbacksAttachable
 

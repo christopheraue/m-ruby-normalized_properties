@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   class PropertyConfig
     def initialize(owner, name, options)
       @owner = owner

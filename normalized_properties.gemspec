@@ -1,12 +1,12 @@
-require_relative 'lib/all/watchable_properties/version'
+require_relative 'lib/all/normalized_properties/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "watchable_properties"
-  spec.version       = WatchableProperties::VERSION
-  spec.summary       = %q{Watchable properties for models}
-  spec.description   = %q{Watchable properties for models}
+  spec.name          = "normalized_properties"
+  spec.version       = NormalizedProperties::VERSION
+  spec.summary       = %q{Normalized properties for models}
+  spec.description   = %q{Normalized properties for models}
 
-  spec.homepage      = "https://github.com/christopheraue/m-ruby-watchable_properties"
+  spec.homepage      = "https://github.com/christopheraue/m-ruby-normalized_properties"
   spec.license       = "Apache-2.0"
   spec.authors       = ["Christopher Aue"]
   spec.email         = ["rubygems@christopheraue.net"]

@@ -1,0 +1,3 @@
+describe NormalizedProperties do
+
+end

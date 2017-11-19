@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   module Manual
     class Set < Set
       EVENTS_TRIGGERED_BY_WATCHER = false

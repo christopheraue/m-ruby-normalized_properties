@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   module InstanceMethods
     def property(name)
       @properties ||= {}
@@ -16,14 +16,14 @@ module WatchableProperties
   end
 
   def inherited(klass)
-    WatchableProperties.extended klass
+    NormalizedProperties.extended klass
     super
   end
 
-  def watchable_attribute(name, config)
+  def normalized_attribute(name, config)
     namespace_name = config.fetch :type
-    namespace = if WatchableProperties.const_defined? namespace_name
-                  WatchableProperties.const_get namespace_name
+    namespace = if NormalizedProperties.const_defined? namespace_name
+                  NormalizedProperties.const_get namespace_name
                 else
                   raise "unknown attribute type #{namespace_name.inspect}"
                 end
@@ -31,10 +31,10 @@ module WatchableProperties
     @property_configs[name] = namespace::Config.new(self, name, 'Attribute', config)
   end
 
-  def watchable_set(name, config)
+  def normalized_set(name, config)
     namespace_name = config.fetch :type
-    namespace = if WatchableProperties.const_defined? namespace_name
-                  WatchableProperties.const_get namespace_name
+    namespace = if NormalizedProperties.const_defined? namespace_name
+                  NormalizedProperties.const_get namespace_name
                 else
                   raise "unknown set type #{namespace_name.inspect}"
                 end
@@ -43,6 +43,6 @@ module WatchableProperties
   end
 
   def property_config(name)
-    @property_configs[name] or (superclass.singleton_class.include? WatchableProperties and superclass.property_config name)
+    @property_configs[name] or (superclass.singleton_class.include? NormalizedProperties and superclass.property_config name)
   end
 end

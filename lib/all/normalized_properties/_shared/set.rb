@@ -1,4 +1,4 @@
-module WatchableProperties
+module NormalizedProperties
   class Set < Property
     def initialize(owner, config, filter = {})
       super owner, config
