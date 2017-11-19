@@ -8,7 +8,7 @@ module NormalizedProperties
       @model_name = options[:model_name]
     end
 
-    attr_reader :name, :filter_mapper
+    attr_reader :owner, :name, :filter_mapper
 
     def model
       @model ||= if not @model_name

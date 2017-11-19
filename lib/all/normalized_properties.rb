@@ -43,6 +43,8 @@ module NormalizedProperties
   end
 
   def property_config(name)
-    @property_configs[name] or (superclass.singleton_class.include? NormalizedProperties and superclass.property_config name)
+    @property_configs[name] or if superclass.singleton_class.include? NormalizedProperties
+                                 superclass.property_config name
+                               end
   end
 end
