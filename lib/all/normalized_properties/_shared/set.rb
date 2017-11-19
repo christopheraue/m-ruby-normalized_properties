@@ -50,5 +50,15 @@ module NormalizedProperties
 
       callback
     end
+
+    def added!(item)
+      trigger :added, item
+      trigger :changed
+    end
+
+    def removed!(item)
+      trigger :removed, item
+      trigger :changed
+    end
   end
 end

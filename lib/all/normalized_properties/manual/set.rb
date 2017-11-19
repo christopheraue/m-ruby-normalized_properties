@@ -8,11 +8,7 @@ module NormalizedProperties
       end
 
       def where(filter)
-        if filter.empty?
-          self
-        else
-          raise Error, 'manual set not filterable'
-        end
+        raise Error, 'manual set not filterable'
       end
     end
   end
