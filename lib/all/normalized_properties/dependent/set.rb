@@ -4,21 +4,23 @@ module NormalizedProperties
       def initialize(owner, config, filter = {})
         super
         filter_base = owner.instance_exec &config.filter_base
-        @set = filter.empty? ? filter_base : filter_base.where(filter)
+        @filtered = filter.empty? ? filter_base : filter_base.where(filter)
       end
+
+      attr_reader :filtered
 
       def source_properties
         @config.source_properties_for self
       end
 
       def value
-        @set.value
+        @owner.__send__ @name
       end
 
       def reload_value
         filter_base = @owner.instance_exec &@config.filter_base
-        @set = @filter.empty? ? filter_base : filter_base.where(@filter)
-        @set.reload_value
+        @filtered = @filter.empty? ? filter_base : filter_base.where(@filter)
+        value
       end
     end
   end
