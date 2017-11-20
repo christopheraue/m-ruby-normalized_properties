@@ -3,23 +3,25 @@ module NormalizedProperties
     class Set < Set
       def initialize(owner, config, filter = {})
         super
-        filter_base = owner.instance_exec &config.filter_base
-        @filtered = filter.empty? ? filter_base : filter_base.where(filter)
+        @source_properties = @config.sources(owner).map do |set|
+          if filter = @filter[set.name]
+            set.where filter
+          else
+            set
+          end
+        end
       end
 
-      attr_reader :filtered
-
-      def source_properties
-        @config.source_properties_for self
+      def source_watches
+        @config.sources owner, intermediate: true
       end
 
       def value
-        @owner.__send__ @name
+        @config.value.call *@source_properties.map(&:value)
       end
 
       def reload_value
-        filter_base = @owner.instance_exec &@config.filter_base
-        @filtered = @filter.empty? ? filter_base : filter_base.where(@filter)
+        @source_properties.each(&:reload_value)
         value
       end
     end

@@ -17,10 +17,11 @@ describe NormalizedProperties::Dependent::Attribute do
       end
 
       def dependent_attribute
-        "dependent_#{attribute}"
+        property(:dependent_attribute).value
       end
       normalized_attribute :dependent_attribute, type: 'Dependent', sources: :attribute,
-        filter: ->(filter){ {attribute: filter} }
+        value: ->(attribute_value){ "dependent_#{attribute_value}" },
+        filter: ->(filter){ {attribute: filter.sub("dependent_", "")} }
 
       def child
         @child ||= self.class.new
@@ -28,9 +29,10 @@ describe NormalizedProperties::Dependent::Attribute do
       normalized_attribute :child, type: 'Manual'
 
       def child_dependent
-        "child_dependent_#{child.attribute}"
+        property(:child_dependent).value
       end
       normalized_attribute :child_dependent, type: 'Dependent', sources: {child: :attribute},
+        value: ->(child_attribute_value){ "child_dependent_#{child_attribute_value}" },
         filter: ->(filter){ {child: {attribute: filter}} }
     end
   end

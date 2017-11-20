@@ -11,7 +11,7 @@ module NormalizedProperties
             raise Error, "already watching"
           else
             @value = @attribute.reload_value
-            @watchers = @attribute.source_properties.map do |source_prop|
+            @watchers = @attribute.source_watches.map do |source_prop|
               source_prop.on(:changed){ trigger_changes }
             end
           end

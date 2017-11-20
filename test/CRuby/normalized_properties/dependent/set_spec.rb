@@ -23,11 +23,11 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       def dependent_set
-        property(:dependent_set).filtered.value.map{ |item| "dependent_#{item}" }
+        property(:dependent_set).value
       end
       normalized_set :dependent_set, type: 'Dependent', model: 'String', sources: :set,
-        filter_base: ->{ property(:set) },
-        filter: ->(filter){ {set: filter} }
+        value: ->(set_items){ set_items.map{ |item| "dependent_#{item}" } },
+        filter: ->(filter){ {set: filter.sub("dependent_", "")} }
     end
   end
   let(:instance){ model.new }

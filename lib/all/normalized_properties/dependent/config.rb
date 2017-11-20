@@ -7,28 +7,25 @@ module NormalizedProperties
           filter: config.fetch(:filter),
           model_name: config[:model]
 
-        @sources = config.fetch(:sources)
-        @filter_base = config.fetch :filter_base if type == 'Set'
+        @sources = config.fetch :sources
+        @value = config.fetch :value
       end
 
-      attr_reader :sources, :filter_base
+      attr_reader :value
 
-      def source_properties_for(property)
-        source_properties property.owner, @sources
-      end
-
-      private def source_properties(owner, source)
+      def sources(owner, opts = {intermediate: false}, source = @sources)
         case source
         when Hash
           source.flat_map do |association_name, association_source|
             association = owner.__send__ association_name
-            props = [owner.property(association_name)]
-            props.concat source_properties(association, association_source) if association
+            props = []
+            props << owner.property(association_name) if opts.fetch(:intermediate)
+            props.concat sources(association, opts, association_source) if association
             props
           end
         when Array
           source.flat_map do |owner_source|
-            source_properties owner, owner_source
+            sources owner, opts, owner_source
           end
         else
           [owner.property(source)]

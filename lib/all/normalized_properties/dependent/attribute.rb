@@ -1,16 +1,21 @@
 module NormalizedProperties
   module Dependent
     class Attribute < Attribute
-      def source_properties
-        @config.source_properties_for self
+      def initialize(owner, config)
+        super
+        @source_properties = @config.sources(@owner)
+      end
+
+      def source_watches
+        @config.sources owner, intermediate: true
       end
 
       def value
-        @owner.__send__ @name
+        @config.value.call *@source_properties.map(&:value)
       end
 
       def reload_value
-        source_properties.each(&:reload_value)
+        @source_properties.each(&:reload_value)
         value
       end
     end
