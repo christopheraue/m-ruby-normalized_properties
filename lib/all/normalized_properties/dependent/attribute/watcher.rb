@@ -28,7 +28,7 @@ module NormalizedProperties
         def trigger_changes
           @previous_value = @value
           @value = @attribute.reload_value
-          @attribute.trigger :changed, @value, @previous_value if @value != @previous_value
+          @attribute.trigger :changed if @value != @previous_value
         end
       end
     end
