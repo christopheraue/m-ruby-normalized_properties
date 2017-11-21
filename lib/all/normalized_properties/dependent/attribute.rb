@@ -13,11 +13,6 @@ module NormalizedProperties
       def value
         @owner.instance_exec @sources, &@config.value
       end
-
-      def reload_value
-        @config.reload_sources @sources
-        value
-      end
     end
   end
 end

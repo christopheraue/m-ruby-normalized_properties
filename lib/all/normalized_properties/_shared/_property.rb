@@ -16,10 +16,6 @@ module NormalizedProperties
       raise NotImplementedError, "must be implemented by subclass"
     end
 
-    def reload_value
-      value
-    end
-
     def set?
       raise NotImplementedError, "must be implemented by subclass"
     end

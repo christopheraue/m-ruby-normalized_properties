@@ -4,7 +4,7 @@ module NormalizedProperties
       class Watcher < Watcher
         def trigger_changes
           @previous_value = @value
-          @value = @property.reload_value
+          @value = @property.value
 
           if @value != @previous_value
             @property.trigger :changed

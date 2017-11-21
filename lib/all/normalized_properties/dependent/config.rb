@@ -31,17 +31,6 @@ module NormalizedProperties
         result
       end
 
-      def reload_sources(sources)
-        case sources
-        when Hash
-          sources.each_value{ |prop_sources| reload_sources prop_sources }
-        when Array
-          sources.each{ |source| reload_sources(source) }
-        else
-          sources.reload_value
-        end
-      end
-
       def flattened_sources(sources)
         result = []
         case sources

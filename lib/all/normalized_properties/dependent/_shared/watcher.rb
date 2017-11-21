@@ -9,7 +9,7 @@ module NormalizedProperties
         if @watchers
           raise Error, "already watching"
         else
-          @value = @property.reload_value
+          @value = @property.value
           @watchers = @property.watch_sources.map do |source_prop|
             source_prop.on(:changed){ trigger_changes }
           end
