@@ -25,8 +25,9 @@ describe NormalizedProperties::Dependent::Set do
       def dependent_set
         property(:dependent_set).value
       end
-      normalized_set :dependent_set, type: 'Dependent', model: 'String', sources: :set,
-        value: ->(set_items){ set_items.map{ |item| "dependent_#{item}" } },
+      normalized_set :dependent_set, type: 'Dependent', model: 'String',
+        sources: :set,
+        value: ->(sources){ sources[:set].value.map{ |item| "dependent_#{item}" } },
         filter: ->(filter){ {set: filter.sub("dependent_", "")} }
     end
   end

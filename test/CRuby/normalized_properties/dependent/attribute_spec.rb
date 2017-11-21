@@ -19,8 +19,9 @@ describe NormalizedProperties::Dependent::Attribute do
       def dependent_attribute
         property(:dependent_attribute).value
       end
-      normalized_attribute :dependent_attribute, type: 'Dependent', sources: :attribute,
-        value: ->(attribute_value){ "dependent_#{attribute_value}" },
+      normalized_attribute :dependent_attribute, type: 'Dependent',
+        sources: :attribute,
+        value: ->(sources){ "dependent_#{sources[:attribute].value}" },
         filter: ->(filter){ {attribute: filter.sub("dependent_", "")} }
 
       def child
@@ -31,8 +32,9 @@ describe NormalizedProperties::Dependent::Attribute do
       def child_dependent
         property(:child_dependent).value
       end
-      normalized_attribute :child_dependent, type: 'Dependent', sources: {child: :attribute},
-        value: ->(child_attribute_value){ "child_dependent_#{child_attribute_value}" },
+      normalized_attribute :child_dependent, type: 'Dependent',
+        sources: {child: :attribute},
+        value: ->(sources){ "child_dependent_#{sources[:child][:attribute].value}" },
         filter: ->(filter){ {child: {attribute: filter}} }
     end
   end

@@ -13,23 +13,46 @@ module NormalizedProperties
 
       attr_reader :value
 
-      def sources(owner, opts = {intermediate: false}, source = @sources)
-        case source
+      def sources(owner, sources = @sources)
+        result = {}
+        case sources
         when Hash
-          source.flat_map do |association_name, association_source|
-            association = owner.__send__ association_name
-            props = []
-            props << owner.property(association_name) if opts.fetch(:intermediate)
-            props.concat sources(association, opts, association_source) if association
-            props
+          sources.each do |prop_name, prop_sources|
+            result[prop_name] = {__self__: sources(owner, prop_name)}
+            result[prop_name].merge! sources(owner.__send__(prop_name), prop_sources)
           end
         when Array
-          source.flat_map do |owner_source|
-            sources owner, opts, owner_source
+          sources.each do |source|
+            result.merge! sources(owner, source)
           end
         else
-          [owner.property(source)]
+          result[sources] = owner.property sources
         end
+        result
+      end
+
+      def reload_sources(sources)
+        case sources
+        when Hash
+          sources.each_value{ |prop_sources| reload_sources prop_sources }
+        when Array
+          sources.each{ |source| reload_sources(source) }
+        else
+          sources.reload_value
+        end
+      end
+
+      def flattened_sources(sources)
+        result = []
+        case sources
+        when Hash
+          sources.each_value{ |prop_sources| result.concat flattened_sources prop_sources }
+        when Array
+          sources.each{ |source| result.concat flattened_sources(source) }
+        else
+          result.push sources
+        end
+        result
       end
     end
   end
