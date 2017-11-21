@@ -13,10 +13,12 @@ module NormalizedProperties
     end
 
     def where(filter)
+      raise ArgumentError, "filter no hash" unless filter.is_a? Hash
+
       if filter.empty?
         self
       else
-        self.class.new @owner, @config, @filter.deep_merge(prepare_filter filter)
+        self.class.new @owner, @config, merge_filter(@filter, prepare_filter(filter))
       end
     end
 
@@ -25,13 +27,29 @@ module NormalizedProperties
         model.property_config(prop_name).filter_mapper.call(prop_filter).each do |prop_name2, prop_filter2|
           prop_model = model.property_config(prop_name2).model
           if prop_model and prop_filter2.is_a? Hash
-            prepared.deep_merge! model.property_config(prop_name2).filter_mapper.call prepare_filter(prop_filter2, prop_model)
+            merge_filter! prepared, model.property_config(prop_name2).filter_mapper.call(prepare_filter(prop_filter2, prop_model))
           else
             prepared[prop_name2] = prop_filter2
           end
         end
         prepared
       end
+    end
+
+    private def merge_filter(filter1, filter2)
+      merge_filter! filter1.dup, filter2
+    end
+
+    private def merge_filter!(filter1, filter2)
+      merged = filter1
+      filter2.each do |key, value|
+        merged[key] = if merged[key].is_a? Hash and value.is_a? Hash
+                        deep_merge! merged[key], value
+                      else
+                        value
+                      end
+      end
+      merged
     end
 
     EVENTS_TRIGGERED_BY_WATCHER = %i(changed added removed)

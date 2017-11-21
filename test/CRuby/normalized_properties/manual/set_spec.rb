@@ -2,7 +2,10 @@ describe NormalizedProperties::Manual::Set do
   subject(:set){ instance.property :set }
 
   before do
-    stub_const('Item', Class.new(String))
+    stub_const('Item', Class.new(String) do
+      extend NormalizedProperties
+      normalized_attribute :to_s, type: 'Manual'
+    end)
 
     stub_const('Set', Class.new do
       extend NormalizedProperties
@@ -27,9 +30,9 @@ describe NormalizedProperties::Manual::Set do
     end)
   end
 
-  let(:item1){ Item.new 'item1' }
-  let(:item2){ Item.new 'item2' }
-  let(:item3){ Item.new 'item3' }
+  let(:item1){ Item.new 'item' }
+  let(:item2){ Item.new 'another_item' }
+  let(:item3){ Item.new 'item' }
   let(:instance){ Set.new [item1, item2, item3] }
 
   it{ is_expected.to have_attributes(owner: instance) }
@@ -41,8 +44,29 @@ describe NormalizedProperties::Manual::Set do
   it{ is_expected.to have_attributes(model: Item) }
 
   describe "#where" do
-    subject{ set.where :filter }
-    it{ is_expected.to raise_error NormalizedProperties::Error, 'manual set not filterable' }
+    subject{ set.where filter }
+
+    context "when the filter is no hash" do
+      let(:filter){ :no_hash }
+      it{ is_expected.to raise_error ArgumentError, 'filter no hash' }
+    end
+
+    context "when the filter is a hash" do
+      context "when no item matches the filter" do
+        let(:filter){ {to_s: 'no_item'} }
+        it{ is_expected.to have_attributes(value: []) }
+      end
+
+      context "when one item matches the filter" do
+        let(:filter){ {to_s: 'another_item'} }
+        it{ is_expected.to have_attributes(value: [item2]) }
+      end
+
+      context "when multiple items match the filter" do
+        let(:filter){ {to_s: 'item'} }
+        it{ is_expected.to have_attributes(value: [item1, item3]) }
+      end
+    end
   end
 
   describe "watching the addition of an item" do

@@ -4,6 +4,15 @@ module NormalizedProperties
       false
     end
 
+    def satisfies?(filter)
+      case filter
+      when Hash
+        filter.all?{ |prop_name, prop_filter| value.property(prop_name).satisfies? prop_filter }
+      else
+        value == filter
+      end
+    end
+
     EVENTS_TRIGGERED_BY_WATCHER = %i(changed)
 
     def on(*events)
