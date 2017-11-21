@@ -31,17 +31,15 @@ module NormalizedProperties
         result
       end
 
-      def flattened_sources(sources)
-        result = []
+      def watch_sources(sources)
         case sources
         when Hash
-          sources.each_value{ |prop_sources| result.concat flattened_sources prop_sources }
+          sources.each_value.flat_map{ |source| watch_sources source }
         when Array
-          sources.each{ |source| result.concat flattened_sources(source) }
+          sources.flat_map{ |source| watch_sources source }
         else
-          result.push sources
+          [sources]
         end
-        result
       end
     end
   end
