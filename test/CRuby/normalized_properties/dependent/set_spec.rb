@@ -1,75 +1,137 @@
 describe NormalizedProperties::Dependent::Set do
-  subject(:dependent_set){ instance.property :dependent_set }
-
-  let(:model) do
-    Class.new do
+  before do
+    stub_const('SetOwner', Class.new do
       extend NormalizedProperties
 
-      def initialize
-        @set = %w(item1 item2 item3)
+      def initialize(items = [])
+        @set = items
       end
 
       attr_reader :set
-      normalized_set :set, type: 'Manual', model: 'String'
+      normalized_set :set, type: 'Manual', model: 'Item'
 
-      def add_to_set(item)
-        @set.push item
-        property(:set).added! item
+      def child
+        @child ||= self.class.new
       end
+      normalized_attribute :child, type: 'Manual'
 
-      def remove_from_set(item)
-        @set.delete item
-        property(:set).removed! item
-      end
-
-      def dependent_set
-        property(:dependent_set).value
-      end
-      normalized_set :dependent_set, type: 'Dependent', model: 'String',
+      normalized_set :symbol_dependent, type: 'Dependent', model: 'DependentItem',
         sources: :set,
-        value: ->(sources){ sources[:set].value.map{ |item| "dependent_#{item}" } },
-        filter: ->(filter){ {set: filter.sub("dependent_", "")} }
+        value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
+        filter: ->(filter){ {set: filter} }
+
+      normalized_set :array_dependent, type: 'Dependent', model: 'DependentItem',
+        sources: [:set],
+        value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
+        filter: ->(filter){ {set: filter} }
+
+      normalized_set :hash_dependent, type: 'Dependent', model: 'DependentItem',
+        sources: {child: :set},
+        value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } },
+        filter: ->(filter){ {child: {set: filter}} }
+
+      normalized_set :mixed_dependent, type: 'Dependent', model: 'DependentItem',
+        sources: {child: [child: :set]},
+        value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } },
+        filter: ->(filter){ {child: {child: {set: filter}}} }
+    end)
+
+    stub_const('Item', Class.new)
+
+    stub_const('DependentItem', Class.new do
+      def initialize(item)
+        @item = item
+      end
+      attr_reader :item
+
+      def ==(other)
+        @item == other.item
+      end
+      alias eql? ==
+
+      def hash
+        @item.hash
+      end
+    end)
+  end
+
+  shared_examples "for a set property" do |property_name|
+    subject(:dependent_set){ dependent_owner.property property_name }
+
+    let(:dependent_owner){ SetOwner.new }
+    let(:item1){ Item.new }
+    let(:item2){ Item.new }
+    let(:item3){ Item.new }
+    before{ set_owner.set.concat [item1, item2, item3] }
+
+    it{ is_expected.to have_attributes(owner: dependent_owner) }
+    it{ is_expected.to have_attributes(name: property_name) }
+    it{ is_expected.to have_attributes(to_s: "#{dependent_owner}##{property_name}") }
+    it{ is_expected.to have_attributes(value: [DependentItem.new(item1), DependentItem.new(item2),
+      DependentItem.new(item3)]) }
+    it{ is_expected.to have_attributes(filter: {}) }
+    it{ is_expected.to have_attributes(model: DependentItem) }
+
+    describe "#where" do
+      subject{ dependent_set.where({}) }
+      it{ is_expected.to eq dependent_set }
+    end
+
+    describe "watching the addition of an item" do
+      subject do
+        set_owner.set.push item4
+        set_owner.property(:set).added! item4
+      end
+
+      let(:item4){ Item.new }
+
+      before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
+      before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
+      let(:addition_callback){ proc{} }
+      let(:change_callback){ proc{} }
+
+      before{ expect(addition_callback).to receive(:call).with(DependentItem.new item4) }
+      before{ expect(change_callback).to receive(:call) }
+      it{ is_expected.not_to raise_error }
+      after{ expect(dependent_set.value).to eq [DependentItem.new(item1), DependentItem.new(item2),
+        DependentItem.new(item3), DependentItem.new(item4)] }
+    end
+
+    describe "watching the removal of an item" do
+      subject do
+        set_owner.set.delete item2
+        set_owner.property(:set).removed! item2
+      end
+
+      before{ dependent_set.on(:removed){ |*args| removal_callback.call *args } }
+      before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
+      let(:removal_callback){ proc{} }
+      let(:change_callback){ proc{} }
+
+      before{ expect(removal_callback).to receive(:call).with(DependentItem.new item2) }
+      before{ expect(change_callback).to receive(:call) }
+      it{ is_expected.not_to raise_error }
+      after{ expect(dependent_set.value).to eq [DependentItem.new(item1), DependentItem.new(item3)] }
     end
   end
-  let(:instance){ model.new }
 
-  it{ is_expected.to have_attributes(owner: instance) }
-  it{ is_expected.to have_attributes(name: :dependent_set) }
-  it{ is_expected.to have_attributes(to_s: "#{instance}#dependent_set") }
-  it{ is_expected.to have_attributes(value: %w(dependent_item1 dependent_item2 dependent_item3)) }
-  it{ is_expected.to have_attributes(filter: {}) }
-  it{ is_expected.to have_attributes(model: String) }
-
-  describe "#where" do
-    subject{ dependent_set.where({}) }
-    it{ is_expected.to eq dependent_set }
+  context "when the set has a symbol source" do
+    let(:set_owner){ dependent_owner }
+    include_examples "for a set property", :symbol_dependent
   end
 
-  describe "watching the addition of an item" do
-    subject{ instance.add_to_set 'item4' }
-
-    before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
-    before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
-    let(:addition_callback){ proc{} }
-    let(:change_callback){ proc{} }
-
-    before{ expect(addition_callback).to receive(:call).with('dependent_item4') }
-    before{ expect(change_callback).to receive(:call) }
-    it{ is_expected.not_to raise_error }
-    after{ expect(dependent_set.value).to eq %w(dependent_item1 dependent_item2 dependent_item3 dependent_item4) }
+  context "when the set has an array source" do
+    let(:set_owner){ dependent_owner }
+    include_examples "for a set property", :array_dependent
   end
 
-  describe "watching the removal of an item" do
-    subject{ instance.remove_from_set 'item2' }
+  context "when the set has a hash source" do
+    let(:set_owner){ dependent_owner.child }
+    include_examples "for a set property", :hash_dependent
+  end
 
-    before{ dependent_set.on(:removed){ |*args| removal_callback.call *args } }
-    before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
-    let(:removal_callback){ proc{} }
-    let(:change_callback){ proc{} }
-
-    before{ expect(removal_callback).to receive(:call).with('dependent_item2') }
-    before{ expect(change_callback).to receive(:call) }
-    it{ is_expected.not_to raise_error }
-    after{ expect(dependent_set.value).to eq %w(dependent_item1 dependent_item3) }
+  context "when the set has a mixed source" do
+    let(:set_owner){ dependent_owner.child.child }
+    include_examples "for a set property", :mixed_dependent
   end
 end
