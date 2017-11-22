@@ -1,31 +1,30 @@
 describe NormalizedProperties::Manual::Attribute do
-  subject(:attribute){ instance.property :attribute }
-
-  let(:model) do
-    Class.new do
+  before do
+    stub_const('AttributeOwner', Class.new do
       extend NormalizedProperties
 
-      def attribute
-        @value ||= 'attribute_value'
+      def initialize(attribute_value)
+        @attribute = attribute_value
       end
 
-      def attribute=(new_value)
-        @value = new_value
-        property(:attribute).changed!
-      end
-
+      attr_accessor :attribute
       normalized_attribute :attribute, type: 'Manual'
-    end
+    end)
   end
-  let(:instance){ model.new }
 
-  it{ is_expected.to have_attributes(owner: instance) }
+  subject(:attribute){ owner.property :attribute }
+  let(:owner){ AttributeOwner.new 'attribute_value' }
+
+  it{ is_expected.to have_attributes(owner: owner) }
   it{ is_expected.to have_attributes(name: :attribute) }
-  it{ is_expected.to have_attributes(to_s: "#{instance}#attribute") }
+  it{ is_expected.to have_attributes(to_s: "#{owner}#attribute") }
   it{ is_expected.to have_attributes(value: 'attribute_value') }
 
-  describe "watching a change" do
-    subject{ instance.attribute = 'changed_value' }
+  describe "manual change of the attribute" do
+    subject do
+      owner.attribute = 'changed_value'
+      owner.property(:attribute).changed!
+    end
 
     before{ attribute.on(:changed){ |*args| callback.call *args } }
     let(:callback){ proc{} }
