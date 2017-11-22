@@ -5,7 +5,7 @@ module NormalizedProperties
         super owner, name,
           property_class: Dependent.const_get(type),
           filter: config.fetch(:filter),
-          model_name: config[:model]
+          model: config[:model]
 
         @sources = config.fetch :sources
         @value = config.fetch :value

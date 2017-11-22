@@ -4,8 +4,8 @@ module NormalizedProperties
       @owner = owner
       @name = name
       @property_class = options.fetch :property_class
-      @filter_mapper = (options[:filter] or ->(filter_value){ {name => filter_value} })
-      @model_name = options[:model_name]
+      @filter_mapper = options.fetch :filter
+      @model_name = options.fetch :model
     end
 
     attr_reader :owner, :name, :filter_mapper
