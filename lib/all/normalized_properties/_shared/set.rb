@@ -12,6 +12,25 @@ module NormalizedProperties
       true
     end
 
+    def satisfies?(filter)
+      if @config.model
+        filter = {id: filter.property(:id).value} if filter.is_a? @config.model
+
+        case filter
+        when Hash
+          not where(filter).value.empty?
+        when true
+          not value.empty?
+        when false
+          value.empty?
+        else
+          raise ArgumentError, "filter for property #{self} no hash or boolean"
+        end
+      else
+        value == filter
+      end
+    end
+
     def where(filter)
       raise ArgumentError, "filter no hash" unless filter.is_a? Hash
 

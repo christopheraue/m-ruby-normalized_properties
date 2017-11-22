@@ -123,6 +123,58 @@ describe NormalizedProperties::Manual::Set do
         it{ is_expected.to raise_error ArgumentError, "filter for property Item#association no hash or boolean" }
       end
     end
+
+    context "when the set items have a set property that can be filtered by" do
+      before do
+        Item.class_eval do
+          attr_accessor :set
+          normalized_set :set, type: 'Manual', model: 'SubItem'
+        end
+
+        stub_const('SubItem', Class.new(String) do
+          extend NormalizedProperties
+
+          def initialize(content)
+            @content = content
+          end
+
+          alias id __id__
+          normalized_attribute :id, type: 'Manual'
+
+          attr_reader :content
+          normalized_attribute :content, type: 'Manual'
+        end)
+
+        item1.set = [SubItem.new('subitem1')]
+        item2.set = []
+        item3.set = [SubItem.new('subitem3')]
+      end
+
+      context "when filtering the items by its subset having items" do
+        let(:filter){ {set: true} }
+        it{ is_expected.to have_attributes(value: [item1, item3]) }
+      end
+
+      context "when filtering the items by its subset having no items" do
+        let(:filter){ {set: false} }
+        it{ is_expected.to have_attributes(value: [item2]) }
+      end
+
+      context "when filtering the items by the properties of their associations" do
+        let(:filter){ {set: {content: 'subitem1'}} }
+        it{ is_expected.to have_attributes(value: [item1]) }
+      end
+
+      context "when filtering the items by a directly given association" do
+        let(:filter){ {set: item3.set.first} }
+        it{ is_expected.to have_attributes(value: [item3]) }
+      end
+
+      context "when filtering the items by an invalid filter" do
+        let(:filter){ {set: :symbol} }
+        it{ is_expected.to raise_error ArgumentError, "filter for property Item#set no hash or boolean" }
+      end
+    end
   end
 
   describe "watching the addition of an item" do
