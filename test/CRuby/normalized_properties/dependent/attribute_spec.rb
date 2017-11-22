@@ -1,9 +1,6 @@
 describe NormalizedProperties::Dependent::Attribute do
-  subject(:dependent_attribute){ instance.property :dependent_attribute }
-  let(:child_dependent){ instance.property :child_dependent }
-
-  let(:model) do
-    Class.new do
+  before do
+    stub_const('AttributeOwner', Class.new do
       extend NormalizedProperties
 
       def attribute
@@ -16,56 +13,112 @@ describe NormalizedProperties::Dependent::Attribute do
         property(:attribute).changed!
       end
 
-      def dependent_attribute
-        property(:dependent_attribute).value
-      end
-      normalized_attribute :dependent_attribute, type: 'Dependent',
-        sources: :attribute,
-        value: ->(sources){ "dependent_#{sources[:attribute].value}" },
-        filter: ->(filter){ {attribute: filter.sub("dependent_", "")} }
-
       def child
         @child ||= self.class.new
       end
       normalized_attribute :child, type: 'Manual'
 
-      def child_dependent
-        property(:child_dependent).value
-      end
-      normalized_attribute :child_dependent, type: 'Dependent',
+      normalized_attribute :symbol_dependent, type: 'Dependent',
+        sources: :attribute,
+        value: ->(sources){ "symbol_dependent_#{sources[:attribute].value}" },
+        filter: ->(filter){ {attribute: filter.sub("symbol_dependent_", "")} }
+
+      normalized_attribute :array_dependent, type: 'Dependent',
+        sources: [:attribute],
+        value: ->(sources){ "array_dependent_#{sources[:attribute].value}" },
+        filter: ->(filter){ {attribute: filter.sub("array_dependent_", "")} }
+
+      normalized_attribute :hash_dependent, type: 'Dependent',
         sources: {child: :attribute},
-        value: ->(sources){ "child_dependent_#{sources[:child][:attribute].value}" },
-        filter: ->(filter){ {child: {attribute: filter}} }
-    end
+        value: ->(sources){ "hash_dependent_#{sources[:child][:attribute].value}" },
+        filter: ->(filter){ {child: {attribute: filter.sub("hash_dependent_", "")}} }
+
+      normalized_attribute :mixed_dependent, type: 'Dependent',
+        sources: {child: [child: :attribute]},
+        value: ->(sources){ "mixed_dependent_#{sources[:child][:child][:attribute].value}" },
+        filter: ->(filter){ {child: {attribute: filter.sub("mixed_dependent_", "")}} }
+    end)
   end
-  let(:instance){ model.new }
+  
+  let(:owner){ AttributeOwner.new }
 
-  it{ is_expected.to have_attributes(owner: instance) }
-  it{ is_expected.to have_attributes(name: :dependent_attribute) }
-  it{ is_expected.to have_attributes(to_s: "#{instance}#dependent_attribute") }
-  it{ is_expected.to have_attributes(value: 'dependent_attribute_value') }
+  context "when the attribute has a symbol source" do
+    subject(:dependent_attribute){ owner.property :symbol_dependent }
 
-  describe "watching a change" do
-    context "when the attribute has a symbol source" do
-      subject{ instance.attribute = 'changed_value' }
+    it{ is_expected.to have_attributes(owner: owner) }
+    it{ is_expected.to have_attributes(name: :symbol_dependent) }
+    it{ is_expected.to have_attributes(to_s: "#{owner}#symbol_dependent") }
+    it{ is_expected.to have_attributes(value: 'symbol_dependent_attribute_value') }
+
+    describe "watching a change" do
+      subject{ owner.attribute = 'changed_value' }
 
       before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
       let(:callback){ proc{} }
 
       before{ expect(callback).to receive(:call) }
       it{ is_expected.not_to raise_error }
-      after{ expect(dependent_attribute.value).to eq 'dependent_changed_value' }
+      after{ expect(dependent_attribute.value).to eq 'symbol_dependent_changed_value' }
     end
+  end
 
-    context "when the attribute has a hash source" do
-      subject{ instance.child.attribute = 'changed_value' }
+  context "when the attribute has an array source" do
+    subject(:dependent_attribute){ owner.property :array_dependent }
 
-      before{ child_dependent.on(:changed){ |*args| callback.call *args } }
+    it{ is_expected.to have_attributes(owner: owner) }
+    it{ is_expected.to have_attributes(name: :array_dependent) }
+    it{ is_expected.to have_attributes(to_s: "#{owner}#array_dependent") }
+    it{ is_expected.to have_attributes(value: 'array_dependent_attribute_value') }
+
+    describe "watching a change" do
+      subject{ owner.attribute = 'changed_value' }
+
+      before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
       let(:callback){ proc{} }
 
       before{ expect(callback).to receive(:call) }
       it{ is_expected.not_to raise_error }
-      after{ expect(child_dependent.value).to eq 'child_dependent_changed_value' }
+      after{ expect(dependent_attribute.value).to eq 'array_dependent_changed_value' }
+    end
+  end
+
+  context "when the attribute has a hash source" do
+    subject(:dependent_attribute){ owner.property :hash_dependent }
+
+    it{ is_expected.to have_attributes(owner: owner) }
+    it{ is_expected.to have_attributes(name: :hash_dependent) }
+    it{ is_expected.to have_attributes(to_s: "#{owner}#hash_dependent") }
+    it{ is_expected.to have_attributes(value: 'hash_dependent_attribute_value') }
+
+    describe "watching a change" do
+      subject{ owner.child.attribute = 'changed_value' }
+
+      before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
+      let(:callback){ proc{} }
+
+      before{ expect(callback).to receive(:call) }
+      it{ is_expected.not_to raise_error }
+      after{ expect(dependent_attribute.value).to eq 'hash_dependent_changed_value' }
+    end
+  end
+
+  context "when the attribute has a mixed source" do
+    subject(:dependent_attribute){ owner.property :mixed_dependent }
+
+    it{ is_expected.to have_attributes(owner: owner) }
+    it{ is_expected.to have_attributes(name: :mixed_dependent) }
+    it{ is_expected.to have_attributes(to_s: "#{owner}#mixed_dependent") }
+    it{ is_expected.to have_attributes(value: 'mixed_dependent_attribute_value') }
+
+    describe "watching a change" do
+      subject{ owner.child.child.attribute = 'changed_value' }
+
+      before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
+      let(:callback){ proc{} }
+
+      before{ expect(callback).to receive(:call) }
+      it{ is_expected.not_to raise_error }
+      after{ expect(dependent_attribute.value).to eq 'mixed_dependent_changed_value' }
     end
   end
 end
