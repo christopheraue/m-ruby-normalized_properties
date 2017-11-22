@@ -8,10 +8,6 @@ module NormalizedProperties
 
     attr_reader :filter, :model
 
-    def set?
-      true
-    end
-
     def satisfies?(filter)
       if @config.model
         filter = {id: filter.property(:id).value} if filter.is_a? @config.model

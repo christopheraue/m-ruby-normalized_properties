@@ -16,10 +16,6 @@ module NormalizedProperties
       raise NotImplementedError, "must be implemented by subclass"
     end
 
-    def set?
-      raise NotImplementedError, "must be implemented by subclass"
-    end
-
     def ==(other)
       self.class === other and @owner == other.owner and @name == other.name
     end

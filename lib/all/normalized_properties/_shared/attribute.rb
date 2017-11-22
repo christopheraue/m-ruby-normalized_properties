@@ -1,9 +1,5 @@
 module NormalizedProperties
   class Attribute < Property
-    def set?
-      false
-    end
-
     def satisfies?(filter)
       if @config.model
         filter = {id: filter.property(:id).value} if filter.is_a? @config.model

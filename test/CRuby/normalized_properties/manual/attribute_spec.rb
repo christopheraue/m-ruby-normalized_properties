@@ -22,7 +22,6 @@ describe NormalizedProperties::Manual::Attribute do
   it{ is_expected.to have_attributes(owner: instance) }
   it{ is_expected.to have_attributes(name: :attribute) }
   it{ is_expected.to have_attributes(to_s: "#{instance}#attribute") }
-  it{ is_expected.to have_attributes(set?: false) }
   it{ is_expected.to have_attributes(value: 'attribute_value') }
 
   describe "watching a change" do

@@ -38,7 +38,6 @@ describe NormalizedProperties::Manual::Set do
   it{ is_expected.to have_attributes(owner: instance) }
   it{ is_expected.to have_attributes(name: :set) }
   it{ is_expected.to have_attributes(to_s: "#{instance}#set") }
-  it{ is_expected.to have_attributes(set?: true) }
   it{ is_expected.to have_attributes(value: [item1, item2, item3]) }
   it{ is_expected.to have_attributes(filter: {}) }
   it{ is_expected.to have_attributes(model: Item) }

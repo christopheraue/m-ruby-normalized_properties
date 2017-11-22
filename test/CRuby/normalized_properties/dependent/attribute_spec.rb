@@ -43,7 +43,6 @@ describe NormalizedProperties::Dependent::Attribute do
   it{ is_expected.to have_attributes(owner: instance) }
   it{ is_expected.to have_attributes(name: :dependent_attribute) }
   it{ is_expected.to have_attributes(to_s: "#{instance}#dependent_attribute") }
-  it{ is_expected.to have_attributes(set?: false) }
   it{ is_expected.to have_attributes(value: 'dependent_attribute_value') }
 
   describe "watching a change" do

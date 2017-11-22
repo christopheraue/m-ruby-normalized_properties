@@ -36,7 +36,6 @@ describe NormalizedProperties::Dependent::Set do
   it{ is_expected.to have_attributes(owner: instance) }
   it{ is_expected.to have_attributes(name: :dependent_set) }
   it{ is_expected.to have_attributes(to_s: "#{instance}#dependent_set") }
-  it{ is_expected.to have_attributes(set?: true) }
   it{ is_expected.to have_attributes(value: %w(dependent_item1 dependent_item2 dependent_item3)) }
   it{ is_expected.to have_attributes(filter: {}) }
   it{ is_expected.to have_attributes(model: String) }
