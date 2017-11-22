@@ -5,9 +5,22 @@ module NormalizedProperties
     end
 
     def satisfies?(filter)
-      case filter
-      when Hash
-        filter.all?{ |prop_name, prop_filter| value.property(prop_name).satisfies? prop_filter }
+      if @config.model
+        filter = {id: filter.property(:id).value} if filter.is_a? @config.model
+
+        case filter
+        when Hash
+          v = value
+          filter.all? do |prop_name, prop_filter|
+            v and v.property(prop_name).satisfies? prop_filter
+          end
+        when true
+          !!value
+        when false
+          !value
+        else
+          raise ArgumentError, "filter for property #{self} no hash or boolean"
+        end
       else
         value == filter
       end

@@ -66,6 +66,62 @@ describe NormalizedProperties::Manual::Set do
         let(:filter){ {to_s: 'item'} }
         it{ is_expected.to have_attributes(value: [item1, item3]) }
       end
+
+      context "when filtering by an unknown property" do
+        let(:filter){ {unknown: 'item'} }
+        it{ is_expected.to raise_error ArgumentError, "filter contains unknown property Item#unknown" }
+      end
+    end
+
+    context "when the set items have an association property that can be filtered by" do
+      before do
+        Item.class_eval do
+          attr_accessor :association
+          normalized_attribute :association, type: 'Manual', model: 'ItemAssociation'
+        end
+
+        stub_const('ItemAssociation', Class.new(String) do
+          extend NormalizedProperties
+
+          def initialize(content)
+            @content = content
+          end
+
+          alias id __id__
+          normalized_attribute :id, type: 'Manual'
+
+          attr_reader :content
+          normalized_attribute :content, type: 'Manual'
+        end)
+
+        item1.association = ItemAssociation.new('assoc1')
+        item3.association = ItemAssociation.new('assoc3')
+      end
+
+      context "when filtering the items merely by having an association" do
+        let(:filter){ {association: true} }
+        it{ is_expected.to have_attributes(value: [item1, item3]) }
+      end
+
+      context "when filtering the items by having no association" do
+        let(:filter){ {association: false} }
+        it{ is_expected.to have_attributes(value: [item2]) }
+      end
+
+      context "when filtering the items by the properties of their associations" do
+        let(:filter){ {association: {content: 'assoc1'}} }
+        it{ is_expected.to have_attributes(value: [item1]) }
+      end
+
+      context "when filtering the items by a directly given association" do
+        let(:filter){ {association: item3.association} }
+        it{ is_expected.to have_attributes(value: [item3]) }
+      end
+
+      context "when filtering the items by an invalid filter" do
+        let(:filter){ {association: :symbol} }
+        it{ is_expected.to raise_error ArgumentError, "filter for property Item#association no hash or boolean" }
+      end
     end
   end
 
