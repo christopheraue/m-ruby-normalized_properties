@@ -18,8 +18,12 @@ module NormalizedProperties
         case sources
         when Hash
           sources.each do |prop_name, prop_sources|
-            result[prop_name] = {__self__: sources(owner, prop_name)}
-            result[prop_name].merge! sources(owner.__send__(prop_name), prop_sources)
+            if prop_owner = owner.__send__(prop_name)
+              result[prop_name] = {__self__: sources(owner, prop_name)}
+              result[prop_name].merge! sources(prop_owner, prop_sources)
+            else
+              result[prop_name] = nil
+            end
           end
         when Array
           sources.each do |source|
