@@ -1,4 +1,35 @@
 module NormalizedProperties
+  # Usage: `extend NormalizedProperties`
+  #
+  # The instances of the classes extended with this module get the methods
+  # defined in the InstanceMethods namespace. Usually, instance and class
+  # methods are organized the other way around:
+  #
+  #   module NormalizedProperties
+  #     module ClassMethods
+  #       # Definition of class methods
+  #     end
+  #
+  #     # Definition of instance Methods
+  #   end
+  #
+  #   class Model
+  #     include NormalizedProperties
+  #   end
+  #
+  # The exact opposite is done here, because including a module also alters
+  # constant lookup inside the class it is included into. Example: An
+  # Extensions to NormalizedProperties might define
+  #
+  #   module NormalizedProperties::WorldObject
+  #     # Extension
+  #   end
+  #
+  # After `include NormalizedProperties` a simple `WorldObject` in `Model`
+  # references `NormalizedProperties::WorldObject` instead the top level
+  # `::WorldObject`. To avoid this `extend NormalizedProperties` is used. This
+  # does not alter the constant lookup in unexpected ways.
+
   module InstanceMethods
     def property(name)
       @properties ||= {}
