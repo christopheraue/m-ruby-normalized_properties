@@ -19,7 +19,7 @@ module NormalizedProperties
         when Hash
           sources.each do |prop_name, prop_sources|
             if prop_owner = owner.__send__(prop_name)
-              result[prop_name] = {__self__: sources(owner, prop_name)}
+              result[prop_name] = {__self__: (owner.property prop_name)}
               result[prop_name].merge! sources(prop_owner, prop_sources)
             else
               result[prop_name] = nil
