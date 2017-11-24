@@ -89,7 +89,7 @@ describe NormalizedProperties::Manual::Set do
 
       context "when filtering by an unknown property" do
         let(:filter){ {unknown: 'value'} }
-        it{ expect{ subject.value }.to raise_error NormalizedProperties::Error, "property :unknown does not exist" }
+        it{ expect{ subject.value }.to raise_error NormalizedProperties::Error, "property Item#unknown does not exist" }
       end
 
       context "when filtering by an attribute property of the set items" do

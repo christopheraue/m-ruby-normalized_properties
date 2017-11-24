@@ -36,7 +36,7 @@ module NormalizedProperties
       @properties[name] ||= if config = self.class.property_config(name)
                               config.to_property_for self
                             else
-                              raise Error, "property #{name.inspect} does not exist"
+                              raise Error, "property #{self.class.name}##{name} does not exist"
                             end
     end
   end

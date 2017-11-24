@@ -59,7 +59,7 @@ describe NormalizedProperties::Manual::Attribute do
 
       context "when filtering by an unknown property" do
         let(:filter){ {unknown: 'value'} }
-        it{ expect{ subject.value }.to raise_error NormalizedProperties::Error, "property :unknown does not exist" }
+        it{ expect{ subject.value }.to raise_error NormalizedProperties::Error, "property PropertyOwner#unknown does not exist" }
       end
 
       context "when filtering by an attribute property" do
