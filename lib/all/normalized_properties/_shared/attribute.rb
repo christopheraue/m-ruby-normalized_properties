@@ -7,15 +7,19 @@ module NormalizedProperties
         case filter
         when Hash
           v = value
-          filter.all? do |prop_name, prop_filter|
-            v and v.property(prop_name).satisfies? prop_filter
+          v and filter.all? do |prop_name, prop_filter|
+            prop_config = @config.model.property_config prop_name
+            prop_filter = prop_config.filter_mapper.call prop_filter
+            prop_filter.all? do |mapped_name, mapped_filter|
+              v.property(mapped_name).satisfies? mapped_filter
+            end
           end
         when true
           !!value
         when false
           !value
         else
-          raise ArgumentError, "filter for property #{self} no hash or boolean"
+          raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
         end
       else
         value == filter

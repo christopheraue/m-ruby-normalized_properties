@@ -89,7 +89,7 @@ describe NormalizedProperties::Manual::Set do
 
       context "when filtering by an unknown property" do
         let(:filter){ {unknown: 'value'} }
-        it{ is_expected.to raise_error ArgumentError, "filter contains unknown property Item#unknown" }
+        it{ expect{ subject.value }.to raise_error NormalizedProperties::Error, "property :unknown does not exist" }
       end
 
       context "when filtering by an attribute property of the set items" do
@@ -132,7 +132,7 @@ describe NormalizedProperties::Manual::Set do
 
         context "when filtering the items by an invalid filter" do
           let(:filter){ {association: :symbol} }
-          it{ is_expected.to raise_error ArgumentError, "filter for property Item#association no hash or boolean" }
+          it{ expect{ subject.value }.to raise_error ArgumentError, "filter for property Item#association no hash or boolean" }
         end
       end
 
@@ -159,7 +159,7 @@ describe NormalizedProperties::Manual::Set do
 
         context "when filtering the items by an invalid filter" do
           let(:filter){ {set: :symbol} }
-          it{ is_expected.to raise_error ArgumentError, "filter for property Item#set no hash or boolean" }
+          it{ expect{ subject.value }.to raise_error ArgumentError, "filter for property Item#set no hash or boolean" }
         end
       end
     end

@@ -6,13 +6,17 @@ module NormalizedProperties
 
         case filter
         when Hash
-          not where(filter).value.empty?
+          value.any? do |item|
+            filter.all? do |prop_name, prop_filter|
+              item.property(prop_name).satisfies? prop_filter
+            end
+          end
         when true
           not value.empty?
         when false
           value.empty?
         else
-          raise ArgumentError, "filter for property #{self} no hash or boolean"
+          raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
         end
       else
         value == filter
