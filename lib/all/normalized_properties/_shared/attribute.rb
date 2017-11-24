@@ -3,17 +3,9 @@ module NormalizedProperties
     def satisfies?(filter)
       case value = self.value
       when NormalizedProperties::Instance
-        filter = {id: filter.property(:id).value} if filter.is_a? value.class
-
         case filter
-        when Hash
-          filter.all? do |prop_name, prop_filter|
-            prop_config = value.class.property_config prop_name
-            prop_filter = prop_config.filter_mapper.call prop_filter
-            prop_filter.all? do |mapped_name, mapped_filter|
-              value.property(mapped_name).satisfies? mapped_filter
-            end
-          end
+        when Hash, NormalizedProperties::Instance
+          value.satisfies? filter
         when true
           true
         when nil

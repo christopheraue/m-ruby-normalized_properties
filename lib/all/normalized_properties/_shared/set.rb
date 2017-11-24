@@ -1,15 +1,9 @@
 module NormalizedProperties
   class Set < Property
     def satisfies?(filter)
-      filter = {id: filter.property(:id).value} if filter.is_a? NormalizedProperties::Instance
-
       case filter
-      when Hash
-        value.any? do |item|
-          filter.all? do |prop_name, prop_filter|
-            item.property(prop_name).satisfies? prop_filter
-          end
-        end
+      when Hash, NormalizedProperties::Instance
+        value.any?{ |item| item.satisfies? filter }
       when true
         not value.empty?
       when false

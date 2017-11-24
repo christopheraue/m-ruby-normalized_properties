@@ -39,6 +39,23 @@ module NormalizedProperties
                               raise Error, "property #{self.class.name}##{name} does not exist"
                             end
     end
+
+    def satisfies?(filter)
+      filter = {id: filter.property(:id).value} if filter.is_a? self.class
+
+      return false unless filter.is_a? Hash
+
+      filter.all? do |prop_name, prop_filter|
+        if config = self.class.property_config(prop_name)
+          prop_filter = config.filter_mapper.call prop_filter
+          prop_filter.all? do |mapped_name, mapped_filter|
+            property(mapped_name).satisfies? mapped_filter
+          end
+        else
+          raise Error, "property #{self.class.name}##{prop_name} does not exist"
+        end
+      end
+    end
   end
 
   def self.extended(klass)
