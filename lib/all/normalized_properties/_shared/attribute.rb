@@ -4,14 +4,12 @@ module NormalizedProperties
       case value = self.value
       when NormalizedProperties::Instance
         case filter
-        when Hash, NormalizedProperties::Instance
-          value.satisfies? filter
         when true
           true
         when nil
           false
         else
-          raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
+          value.satisfies? filter
         end
       else
         value == filter

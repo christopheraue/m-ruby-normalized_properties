@@ -131,7 +131,7 @@ describe NormalizedProperties::Manual::Set do
 
         context "when filtering the items by an invalid filter" do
           let(:filter){ {association: :symbol} }
-          it{ expect{ subject.value }.to raise_error ArgumentError, "filter for property Item#association no hash or boolean" }
+          it{ is_expected.to have_attributes(value: []) }
         end
       end
 
@@ -158,7 +158,7 @@ describe NormalizedProperties::Manual::Set do
 
         context "when filtering the items by an invalid filter" do
           let(:filter){ {set: :symbol} }
-          it{ expect{ subject.value }.to raise_error ArgumentError, "filter for property Item#set no hash or boolean" }
+          it{ is_expected.to have_attributes(value: []) }
         end
       end
     end

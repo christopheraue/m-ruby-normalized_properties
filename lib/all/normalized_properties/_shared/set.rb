@@ -2,14 +2,12 @@ module NormalizedProperties
   class Set < Property
     def satisfies?(filter)
       case filter
-      when Hash, NormalizedProperties::Instance
-        value.any?{ |item| item.satisfies? filter }
       when true
         not value.empty?
       when false
         value.empty?
       else
-        raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
+        value.any?{ |item| item.satisfies? filter }
       end
     end
 
