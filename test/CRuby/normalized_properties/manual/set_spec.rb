@@ -8,7 +8,7 @@ describe NormalizedProperties::Manual::Set do
       end
 
       attr_reader :set
-      normalized_set :set, type: 'Manual', model: 'Item'
+      normalized_set :set, type: 'Manual'
     end)
 
     stub_const('Item', Class.new do
@@ -18,10 +18,10 @@ describe NormalizedProperties::Manual::Set do
       normalized_attribute :attribute, type: 'Manual'
 
       attr_accessor :association
-      normalized_attribute :association, type: 'Manual', model: 'ItemProperty'
+      normalized_attribute :association, type: 'Manual'
 
       attr_accessor :set
-      normalized_set :set, type: 'Manual', model: 'ItemProperty'
+      normalized_set :set, type: 'Manual'
     end)
 
     stub_const('ItemProperty', Class.new do
@@ -71,7 +71,6 @@ describe NormalizedProperties::Manual::Set do
   it{ is_expected.to have_attributes(to_s: "#{owner}#set") }
   it{ is_expected.to have_attributes(value: [item1, item2, item3]) }
   it{ is_expected.to have_attributes(filter: {}) }
-  it{ is_expected.to have_attributes(model: Item) }
 
   describe "#where" do
     subject{ set.where filter }

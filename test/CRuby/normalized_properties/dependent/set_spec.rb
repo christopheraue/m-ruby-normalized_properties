@@ -8,29 +8,29 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       attr_reader :set
-      normalized_set :set, type: 'Manual', model: 'Item'
+      normalized_set :set, type: 'Manual'
 
       def child
         @child ||= self.class.new
       end
       normalized_attribute :child, type: 'Manual'
 
-      normalized_set :symbol_dependent, type: 'Dependent', model: 'DependentItem',
+      normalized_set :symbol_dependent, type: 'Dependent',
         sources: :set,
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {set: filter} }
 
-      normalized_set :array_dependent, type: 'Dependent', model: 'DependentItem',
+      normalized_set :array_dependent, type: 'Dependent',
         sources: [:set],
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {set: filter} }
 
-      normalized_set :hash_dependent, type: 'Dependent', model: 'DependentItem',
+      normalized_set :hash_dependent, type: 'Dependent',
         sources: {child: :set},
         value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {child: {set: filter}} }
 
-      normalized_set :mixed_dependent, type: 'Dependent', model: 'DependentItem',
+      normalized_set :mixed_dependent, type: 'Dependent',
         sources: {child: [child: :set]},
         value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {child: {child: {set: filter}}} }
@@ -70,7 +70,6 @@ describe NormalizedProperties::Dependent::Set do
     it{ is_expected.to have_attributes(value: [DependentItem.new(item1), DependentItem.new(item2),
       DependentItem.new(item3)]) }
     it{ is_expected.to have_attributes(filter: {}) }
-    it{ is_expected.to have_attributes(model: DependentItem) }
 
     describe "#where" do
       subject{ dependent_set.where({}) }

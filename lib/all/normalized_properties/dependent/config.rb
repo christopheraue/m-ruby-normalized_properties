@@ -4,8 +4,7 @@ module NormalizedProperties
       def initialize(owner, name, type, config)
         super owner, name,
           property_class: Dependent.const_get(type),
-          filter: config.fetch(:filter),
-          model: config[:model]
+          filter: config.fetch(:filter)
 
         @sources = config.fetch :sources
         @value = config.fetch :value

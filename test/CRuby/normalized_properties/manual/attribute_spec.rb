@@ -7,7 +7,7 @@ describe NormalizedProperties::Manual::Attribute do
       normalized_attribute :attribute, type: 'Manual'
 
       attr_accessor :association
-      normalized_attribute :association, type: 'Manual', model: 'PropertyOwner'
+      normalized_attribute :association, type: 'Manual'
     end)
   end
 
