@@ -1,23 +1,23 @@
 module NormalizedProperties
   class Attribute < Property
     def satisfies?(filter)
-      if @config.model
-        filter = {id: filter.property(:id).value} if filter.is_a? @config.model
+      case value = self.value
+      when NormalizedProperties::InstanceMethods
+        filter = {id: filter.property(:id).value} if filter.is_a? value.class
 
         case filter
         when Hash
-          v = value
-          v and filter.all? do |prop_name, prop_filter|
-            prop_config = @config.model.property_config prop_name
+          filter.all? do |prop_name, prop_filter|
+            prop_config = value.class.property_config prop_name
             prop_filter = prop_config.filter_mapper.call prop_filter
             prop_filter.all? do |mapped_name, mapped_filter|
-              v.property(mapped_name).satisfies? mapped_filter
+              value.property(mapped_name).satisfies? mapped_filter
             end
           end
         when true
-          !!value
-        when false
-          !value
+          true
+        when nil
+          false
         else
           raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
         end

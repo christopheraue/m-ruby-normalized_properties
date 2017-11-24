@@ -116,7 +116,7 @@ describe NormalizedProperties::Manual::Set do
         end
 
         context "when filtering the items by having no association" do
-          let(:filter){ {association: false} }
+          let(:filter){ {association: nil} }
           it{ is_expected.to have_attributes(value: [item2]) }
         end
 

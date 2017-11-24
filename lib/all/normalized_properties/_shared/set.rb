@@ -1,25 +1,21 @@
 module NormalizedProperties
   class Set < Property
     def satisfies?(filter)
-      if @config.model
-        filter = {id: filter.property(:id).value} if filter.is_a? @config.model
+      filter = {id: filter.property(:id).value} if filter.is_a? NormalizedProperties::InstanceMethods
 
-        case filter
-        when Hash
-          value.any? do |item|
-            filter.all? do |prop_name, prop_filter|
-              item.property(prop_name).satisfies? prop_filter
-            end
+      case filter
+      when Hash
+        value.any? do |item|
+          filter.all? do |prop_name, prop_filter|
+            item.property(prop_name).satisfies? prop_filter
           end
-        when true
-          not value.empty?
-        when false
-          value.empty?
-        else
-          raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
         end
+      when true
+        not value.empty?
+      when false
+        value.empty?
       else
-        value == filter
+        raise ArgumentError, "filter for property #{owner.class.name}##{name} no hash or boolean"
       end
     end
 
