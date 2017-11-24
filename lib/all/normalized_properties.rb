@@ -2,8 +2,8 @@ module NormalizedProperties
   # Usage: `extend NormalizedProperties`
   #
   # The instances of the classes extended with this module get the methods
-  # defined in the InstanceMethods namespace. Usually, instance and class
-  # methods are organized the other way around:
+  # defined in the Instance namespace. Usually, instance and class methods
+  # are organized the other way around:
   #
   #   module NormalizedProperties
   #     module ClassMethods
@@ -30,7 +30,7 @@ module NormalizedProperties
   # `::WorldObject`. To avoid this `extend NormalizedProperties` is used. This
   # does not alter the constant lookup in unexpected ways.
 
-  module InstanceMethods
+  module Instance
     def property(name)
       @properties ||= {}
       @properties[name] ||= if config = self.class.property_config(name)
@@ -42,7 +42,7 @@ module NormalizedProperties
   end
 
   def self.extended(klass)
-    klass.__send__ :include, InstanceMethods
+    klass.__send__ :include, Instance
     klass.instance_variable_set :@property_configs, {}
   end
 

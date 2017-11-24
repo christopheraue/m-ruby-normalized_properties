@@ -1,7 +1,7 @@
 module NormalizedProperties
   class Set < Property
     def satisfies?(filter)
-      filter = {id: filter.property(:id).value} if filter.is_a? NormalizedProperties::InstanceMethods
+      filter = {id: filter.property(:id).value} if filter.is_a? NormalizedProperties::Instance
 
       case filter
       when Hash

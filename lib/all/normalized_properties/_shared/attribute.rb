@@ -2,7 +2,7 @@ module NormalizedProperties
   class Attribute < Property
     def satisfies?(filter)
       case value = self.value
-      when NormalizedProperties::InstanceMethods
+      when NormalizedProperties::Instance
         filter = {id: filter.property(:id).value} if filter.is_a? value.class
 
         case filter
