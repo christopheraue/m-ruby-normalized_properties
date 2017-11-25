@@ -6,15 +6,7 @@ module NormalizedProperties
       def value
         case value = @owner.__send__(@config.name)
         when NormalizedProperties::Instance
-          satisfies_filter = if @filter
-                               @filter.all? do |prop_name, prop_filter|
-                                 value.property(prop_name).satisfies? prop_filter
-                               end
-                             else
-                               true
-                             end
-
-          value if satisfies_filter
+          value if not @filter or value.satisfies? @filter
         else
           value
         end

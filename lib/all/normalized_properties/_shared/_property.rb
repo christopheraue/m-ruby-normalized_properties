@@ -32,11 +32,7 @@ module NormalizedProperties
     end
 
     private def merge_filter(filter1, filter2)
-      merge_filter! filter1.dup, filter2
-    end
-
-    private def merge_filter!(filter1, filter2)
-      merged = filter1
+      merged = filter1.dup
       filter2.each do |key, value|
         merged[key] = if merged[key].is_a? Hash and value.is_a? Hash
                         deep_merge! merged[key], value

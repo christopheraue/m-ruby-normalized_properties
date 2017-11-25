@@ -5,9 +5,7 @@ module NormalizedProperties
 
       def value
         @owner.__send__(@config.name).select do |item|
-          @filter.all? do |prop_name, prop_filter|
-            item.property(prop_name).satisfies? prop_filter
-          end
+          item.satisfies? @filter
         end
       end
     end
