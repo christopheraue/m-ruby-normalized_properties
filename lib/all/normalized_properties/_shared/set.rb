@@ -1,5 +1,12 @@
 module NormalizedProperties
   class Set < Property
+    def initialize(owner, config, filter = {})
+      super owner, config
+      @filter = filter
+    end
+
+    attr_reader :filter
+
     def satisfies?(filter)
       case filter
       when true
@@ -9,6 +16,28 @@ module NormalizedProperties
       else
         value.any?{ |item| item.satisfies? filter }
       end
+    end
+
+    def where(filter)
+      raise ArgumentError, "filter no hash" unless filter.is_a? Hash
+
+      if filter.empty?
+        self
+      else
+        self.class.new @owner, @config, merge_filter(@filter, filter)
+      end
+    end
+
+    private def merge_filter(filter1, filter2)
+      merged = filter1.dup
+      filter2.each do |key, value|
+        merged[key] = if merged[key].is_a? Hash and value.is_a? Hash
+                        deep_merge! merged[key], value
+                      else
+                        value
+                      end
+      end
+      merged
     end
 
     EVENTS_TRIGGERED_BY_WATCHER = %i(changed added removed)
