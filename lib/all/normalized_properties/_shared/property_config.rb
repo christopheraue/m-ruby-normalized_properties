@@ -1,12 +1,14 @@
 module NormalizedProperties
   class PropertyConfig
-    def initialize(owner, name, type)
+    def initialize(owner, name, namespace, type)
       @owner = owner
       @name = name
-      @property_class = type
+      @namespace = namespace
+      @type = type
+      @property_class = namespace.const_get type
     end
 
-    attr_reader :owner, :name
+    attr_reader :owner, :name, :namespace, :type
 
     def to_property_for(owner)
       @property_class.new owner, self

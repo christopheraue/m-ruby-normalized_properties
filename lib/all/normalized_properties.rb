@@ -62,25 +62,33 @@ module NormalizedProperties
   end
 
   def normalized_attribute(name, config)
-    namespace_name = config.fetch :type
-    namespace = if NormalizedProperties.const_defined? namespace_name
-                  NormalizedProperties.const_get namespace_name
+    type = config.delete(:type){ config.fetch :type }
+    namespace = if NormalizedProperties.const_defined? type
+                  NormalizedProperties.const_get type
                 else
-                  raise Error, "unknown attribute type #{namespace_name.inspect}"
+                  raise Error, "unknown property type #{type.inspect}"
                 end
 
-    @property_configs[name] = namespace::Config.new(self, name, 'Attribute', config)
+    @property_configs[name] = if config.empty?
+                                PropertyConfig.new self, name, namespace, 'Attribute'
+                              else
+                                namespace::Config.new self, name, namespace, 'Attribute', config
+                              end
   end
 
   def normalized_set(name, config)
-    namespace_name = config.fetch :type
-    namespace = if NormalizedProperties.const_defined? namespace_name
-                  NormalizedProperties.const_get namespace_name
+    type = config.delete(:type){ config.fetch :type }
+    namespace = if NormalizedProperties.const_defined? type
+                  NormalizedProperties.const_get type
                 else
-                  raise Error, "unknown set type #{namespace_name.inspect}"
+                  raise Error, "unknown property type #{type.inspect}"
                 end
 
-    @property_configs[name] = namespace::Config.new(self, name, 'Set', config)
+    @property_configs[name] = if config.empty?
+                                PropertyConfig.new self, name, namespace, 'Set'
+                              else
+                                namespace::Config.new self, name, namespace, 'Set', config
+                              end
   end
 
   def property_config(name)

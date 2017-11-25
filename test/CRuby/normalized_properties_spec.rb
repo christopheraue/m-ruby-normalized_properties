@@ -6,7 +6,7 @@ describe NormalizedProperties do
 
     context "when defining an attribute of an unknown type" do
       let(:config){ {type: 'Unknown'} }
-      it{ is_expected.to raise_error NormalizedProperties::Error, "unknown attribute type \"Unknown\"" }
+      it{ is_expected.to raise_error NormalizedProperties::Error, "unknown property type \"Unknown\"" }
     end
 
     context "when defining an attribute of a known type" do
@@ -20,7 +20,7 @@ describe NormalizedProperties do
 
     context "when defining a set of an unknown type" do
       let(:config){ {type: 'Unknown'} }
-      it{ is_expected.to raise_error NormalizedProperties::Error, "unknown set type \"Unknown\"" }
+      it{ is_expected.to raise_error NormalizedProperties::Error, "unknown property type \"Unknown\"" }
     end
 
     context "when defining a set of a known type" do
