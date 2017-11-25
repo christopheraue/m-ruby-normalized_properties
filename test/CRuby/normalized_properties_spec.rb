@@ -18,12 +18,12 @@ describe NormalizedProperties do
   describe ".normalized_set" do
     subject{ model.normalized_set :name, config }
 
-    context "when defining an attribute of an unknown type" do
+    context "when defining a set of an unknown type" do
       let(:config){ {type: 'Unknown'} }
       it{ is_expected.to raise_error NormalizedProperties::Error, "unknown set type \"Unknown\"" }
     end
 
-    context "when defining an attribute of a known type" do
+    context "when defining a set of a known type" do
       let(:config){ {type: 'Manual'} }
       it{ is_expected.not_to raise_error }
     end
