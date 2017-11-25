@@ -1,13 +1,12 @@
 module NormalizedProperties
   class PropertyConfig
-    def initialize(owner, name, options)
+    def initialize(owner, name, type)
       @owner = owner
       @name = name
-      @property_class = options.fetch :property_class
-      @filter_mapper = options.fetch :filter
+      @property_class = type
     end
 
-    attr_reader :owner, :name, :filter_mapper
+    attr_reader :owner, :name
 
     def to_property_for(owner)
       @property_class.new owner, self

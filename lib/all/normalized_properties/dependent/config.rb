@@ -2,15 +2,14 @@ module NormalizedProperties
   module Dependent
     class Config < PropertyConfig
       def initialize(owner, name, type, config)
-        super owner, name,
-          property_class: Dependent.const_get(type),
-          filter: config.fetch(:filter)
+        super owner, name, Dependent.const_get(type)
 
         @sources = config.fetch :sources
         @value = config.fetch :value
+        @filter_mapper = config.fetch :filter
       end
 
-      attr_reader :value
+      attr_reader :value, :filter_mapper
 
       def sources(owner, sources = @sources)
         result = {}
