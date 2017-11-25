@@ -21,9 +21,6 @@ describe NormalizedProperties::Attribute do
 
         attr_accessor :attribute
         normalized_attribute :attribute, type: 'Manual'
-
-        attr_accessor :set
-        normalized_set :set, type: 'Manual'
       end
     end
 
