@@ -28,16 +28,20 @@ module NormalizedProperties
       end
     end
 
-    private def merge_filter(filter1, filter2)
-      merged = filter1.dup
+    private def merge_filter!(filter1, filter2)
+      merged = filter1
       filter2.each do |key, value|
         merged[key] = if merged[key].is_a? Hash and value.is_a? Hash
-                        deep_merge! merged[key], value
+                        merge_filter! merged[key], value
                       else
                         value
                       end
       end
       merged
+    end
+
+    private def merge_filter(filter1, filter2)
+      merge_filter! filter1.dup, filter2
     end
 
     EVENTS_TRIGGERED_BY_WATCHER = %i(changed added removed)

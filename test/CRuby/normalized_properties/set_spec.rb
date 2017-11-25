@@ -86,6 +86,13 @@ describe NormalizedProperties::Set do
         let(:filter){ {attribute: 'value'} }
         it{ is_expected.to be_a(described_class).and have_attributes(filter: filter) }
       end
+
+      context "when the set is filtered twice" do
+        let(:set){ owner.property(:set).where(this: {will: 'be replaced'}, nested: 'filter') }
+        let(:filter){ {this: {will: 'stay'}, second: 'filter'} }
+        it{ is_expected.to be_a(described_class).and have_attributes(
+          filter: {this: {will: 'stay'}, nested: 'filter', second: 'filter'}) }
+      end
     end
   end
 end
