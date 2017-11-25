@@ -46,14 +46,7 @@ module NormalizedProperties
       return false unless filter.is_a? Hash
 
       filter.all? do |prop_name, prop_filter|
-        if config = self.class.property_config(prop_name)
-          prop_filter = config.filter_mapper.call prop_filter
-          prop_filter.all? do |mapped_name, mapped_filter|
-            property(mapped_name).satisfies? mapped_filter
-          end
-        else
-          raise Error, "property #{self.class.name}##{prop_name} does not exist"
-        end
+        property(prop_name).satisfies? prop_filter
       end
     end
   end
