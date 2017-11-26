@@ -18,31 +18,47 @@ describe NormalizedProperties::Dependent::Set do
       normalized_set :symbol_dependent, type: 'Dependent',
         sources: :set,
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {set: filter} }
+        filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} }
 
       normalized_set :array_dependent, type: 'Dependent',
         sources: [:set],
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {set: filter} }
+        filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} }
 
       normalized_set :hash_dependent, type: 'Dependent',
         sources: {child: :set},
         value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {child: {set: filter}} }
+        filter: ->(filter){ {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}} }
 
       normalized_set :mixed_dependent, type: 'Dependent',
         sources: {child: [child: :set]},
         value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {child: {child: {set: filter}}} }
+        filter: ->(filter){ {child: {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}}} }
     end)
 
-    stub_const('Item', Class.new)
+    stub_const('Item', Class.new do
+      extend NormalizedProperties
+
+      alias id __id__
+      normalized_attribute :id, type: 'Manual'
+
+      attr_accessor :attribute
+      normalized_attribute :attribute, type: 'Manual'
+    end)
 
     stub_const('DependentItem', Class.new do
+      extend NormalizedProperties
+
       def initialize(item)
         @item = item
       end
       attr_reader :item
+      normalized_attribute :item, type: 'Manual'
+
+      normalized_attribute :attribute, type: 'Dependent',
+        sources: {item: :attribute},
+        value: ->(sources){ sources[:item][:attribute].value },
+        filter: ->(filter){ {item: {attribute: filter}} }
 
       def ==(other)
         @item == other.item
@@ -59,9 +75,28 @@ describe NormalizedProperties::Dependent::Set do
     subject(:dependent_set){ dependent_owner.property property_name }
 
     let(:dependent_owner){ SetOwner.new }
-    let(:item1){ Item.new }
-    let(:item2){ Item.new }
-    let(:item3){ Item.new }
+
+    let(:item1) do
+      Item.new.tap do |item|
+        item.attribute = 'attribute1'
+      end
+    end
+    let(:dependent_item1){ DependentItem.new item1 }
+
+    let(:item2) do
+      Item.new.tap do |item|
+        item.attribute = 'attribute2'
+      end
+    end
+    let(:dependent_item2){ DependentItem.new item2 }
+
+    let(:item3) do
+      Item.new.tap do |item|
+        item.attribute = 'attribute1'
+      end
+    end
+    let(:dependent_item3){ DependentItem.new item3 }
+
     before{ set_owner.set.concat [item1, item2, item3] }
 
     it{ is_expected.to have_attributes(owner: dependent_owner) }
@@ -70,6 +105,36 @@ describe NormalizedProperties::Dependent::Set do
     it{ is_expected.to have_attributes(value: [DependentItem.new(item1), DependentItem.new(item2),
       DependentItem.new(item3)]) }
     it{ is_expected.to have_attributes(filter: {}) }
+
+    describe "#satisfies?" do
+      subject{ dependent_set.satisfies? filter }
+
+      context "when the filter is a hash with property sub filters" do
+        context "when the set does not satisfy the filter" do
+          let(:filter){ {attribute: "another value"} }
+          it{ is_expected.to be false }
+        end
+
+        context "when the set satisfies the filter" do
+          let(:filter){ {attribute: 'attribute1'} }
+          it{ is_expected.to be true }
+        end
+      end
+
+      context "when the filter is an item directly" do
+        context "when the set does not satisfy the filter" do
+          let(:item4){ Item.new }
+          let(:dependent_item4){ DependentItem.new item4 }
+          let(:filter){ dependent_item4 }
+          it{ is_expected.to be false }
+        end
+
+        context "when the set satisfies the filter" do
+          let(:filter){ dependent_item1 }
+          it{ is_expected.to be true }
+        end
+      end
+    end
 
     describe "#where" do
       subject{ dependent_set.where({}) }
