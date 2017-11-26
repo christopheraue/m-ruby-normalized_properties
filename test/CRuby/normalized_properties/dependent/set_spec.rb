@@ -44,6 +44,26 @@ describe NormalizedProperties::Dependent::Set do
 
       attr_accessor :attribute
       normalized_attribute :attribute, type: 'Manual'
+
+      attr_accessor :association
+      normalized_attribute :association, type: 'Manual'
+
+      attr_accessor :set
+      normalized_set :set, type: 'Manual'
+    end)
+
+    stub_const('ItemProperty', Class.new do
+      extend NormalizedProperties
+
+      def initialize(content)
+        @content = content
+      end
+
+      alias id __id__
+      normalized_attribute :id, type: 'Manual'
+
+      attr_reader :content
+      normalized_attribute :content, type: 'Manual'
     end)
 
     stub_const('DependentItem', Class.new do
@@ -59,6 +79,22 @@ describe NormalizedProperties::Dependent::Set do
         sources: {item: :attribute},
         value: ->(sources){ sources[:item][:attribute].value },
         filter: ->(filter){ {item: {attribute: filter}} }
+
+      def association
+        property(:association).value
+      end
+      normalized_attribute :association, type: 'Dependent',
+        sources: {item: :association},
+        value: ->(sources){ sources[:item][:association].value },
+        filter: ->(filter){ {item: {association: filter}} }
+
+      def set
+        property(:set).value
+      end
+      normalized_set :set, type: 'Dependent',
+        sources: {item: :set},
+        value: ->(sources){ sources[:item][:set].value },
+        filter: ->(filter){ {item: {set: filter}} }
 
       def ==(other)
         @item == other.item
@@ -79,6 +115,8 @@ describe NormalizedProperties::Dependent::Set do
     let(:item1) do
       Item.new.tap do |item|
         item.attribute = 'attribute1'
+        item.association = ItemProperty.new('association1')
+        item.set = [ItemProperty.new('setitem1')]
       end
     end
     let(:dependent_item1){ DependentItem.new item1 }
@@ -86,6 +124,8 @@ describe NormalizedProperties::Dependent::Set do
     let(:item2) do
       Item.new.tap do |item|
         item.attribute = 'attribute2'
+        item.association = nil
+        item.set = [ItemProperty.new('setitem2')]
       end
     end
     let(:dependent_item2){ DependentItem.new item2 }
@@ -93,6 +133,8 @@ describe NormalizedProperties::Dependent::Set do
     let(:item3) do
       Item.new.tap do |item|
         item.attribute = 'attribute1'
+        item.association = ItemProperty.new('association3')
+        item.set = []
       end
     end
     let(:dependent_item3){ DependentItem.new item3 }
@@ -105,7 +147,99 @@ describe NormalizedProperties::Dependent::Set do
     it{ is_expected.to have_attributes(owner: dependent_owner) }
     it{ is_expected.to have_attributes(name: property_name) }
     it{ is_expected.to have_attributes(to_s: "#{dependent_owner}##{property_name}") }
-    it{ is_expected.to have_attributes(value: [dependent_item1, dependent_item2, dependent_item3]) }
+
+    describe "#value" do
+      subject{ dependent_set.value }
+
+      context "when the set has not been filtered" do
+        it{ is_expected.to eq [dependent_item1, dependent_item2, dependent_item3] }
+      end
+
+      context "when the set has been filtered" do
+        let(:dependent_set){ dependent_owner.property(property_name).where filter }
+
+        context "when the filter is empty" do
+          let(:filter){ {} }
+          it{ is_expected.to eq [dependent_item1, dependent_item2, dependent_item3] }
+        end
+
+        context "when filtering by an unknown property" do
+          let(:filter){ {unknown: 'value'} }
+          it{ is_expected.to raise_error NormalizedProperties::Error, "property DependentItem#unknown does not exist" }
+        end
+
+        context "when filtering by an attribute property of the set items" do
+          context "when no item matches the filter" do
+            let(:filter){ {attribute: 'no_item'} }
+            it{ is_expected.to eq [] }
+          end
+
+          context "when one item matches the filter" do
+            let(:filter){ {attribute: 'attribute2'} }
+            it{ is_expected.to eq [dependent_item2] }
+          end
+
+          context "when multiple items match the filter" do
+            let(:filter){ {attribute: 'attribute1'} }
+            it{ is_expected.to eq [dependent_item1, dependent_item3] }
+          end
+        end
+
+        context "when filtering by an association property of the set items" do
+          context "when filtering the items merely by having an association" do
+            let(:filter){ {association: true} }
+            it{ is_expected.to eq [dependent_item1, dependent_item3] }
+          end
+
+          context "when filtering the items by having no association" do
+            let(:filter){ {association: nil} }
+            it{ is_expected.to eq [dependent_item2] }
+          end
+
+          context "when filtering the items by the properties of their associations" do
+            let(:filter){ {association: {content: 'association1'}} }
+            it{ is_expected.to eq [dependent_item1] }
+          end
+
+          context "when filtering the items by a directly given association" do
+            let(:filter){ {association: dependent_item3.association} }
+            it{ is_expected.to eq [dependent_item3] }
+          end
+
+          context "when filtering the items by an invalid filter" do
+            let(:filter){ {association: :symbol} }
+            it{ is_expected.to eq [] }
+          end
+        end
+
+        context "when filtering by a set property of the set items" do
+          context "when filtering the items by its subset having items" do
+            let(:filter){ {set: true} }
+            it{ is_expected.to eq [dependent_item1, dependent_item2] }
+          end
+
+          context "when filtering the items by its subset having no items" do
+            let(:filter){ {set: false} }
+            it{ is_expected.to eq [dependent_item3] }
+          end
+
+          context "when filtering the items by the properties of their associations" do
+            let(:filter){ {set: {content: 'setitem1'}} }
+            it{ is_expected.to eq [dependent_item1] }
+          end
+
+          context "when filtering the items by a directly given association" do
+            let(:filter){ {set: dependent_item2.set.first} }
+            it{ is_expected.to eq [dependent_item2] }
+          end
+
+          context "when filtering the items by an invalid filter" do
+            let(:filter){ {set: :symbol} }
+            it{ is_expected.to eq [] }
+          end
+        end
+      end
+    end
 
     describe "#satisfies?" do
       subject{ dependent_set.satisfies? filter }
@@ -133,11 +267,6 @@ describe NormalizedProperties::Dependent::Set do
           it{ is_expected.to be true }
         end
       end
-    end
-
-    describe "#where" do
-      subject{ dependent_set.where({}) }
-      it{ is_expected.to eq dependent_set }
     end
 
     describe "watching the addition of an item" do
