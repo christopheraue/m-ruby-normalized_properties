@@ -97,14 +97,15 @@ describe NormalizedProperties::Dependent::Set do
     end
     let(:dependent_item3){ DependentItem.new item3 }
 
+    let(:item4){ Item.new }
+    let(:dependent_item4){ DependentItem.new item4 }
+
     before{ set_owner.set.concat [item1, item2, item3] }
 
     it{ is_expected.to have_attributes(owner: dependent_owner) }
     it{ is_expected.to have_attributes(name: property_name) }
     it{ is_expected.to have_attributes(to_s: "#{dependent_owner}##{property_name}") }
-    it{ is_expected.to have_attributes(value: [DependentItem.new(item1), DependentItem.new(item2),
-      DependentItem.new(item3)]) }
-    it{ is_expected.to have_attributes(filter: {}) }
+    it{ is_expected.to have_attributes(value: [dependent_item1, dependent_item2, dependent_item3]) }
 
     describe "#satisfies?" do
       subject{ dependent_set.satisfies? filter }
@@ -123,8 +124,6 @@ describe NormalizedProperties::Dependent::Set do
 
       context "when the filter is an item directly" do
         context "when the set does not satisfy the filter" do
-          let(:item4){ Item.new }
-          let(:dependent_item4){ DependentItem.new item4 }
           let(:filter){ dependent_item4 }
           it{ is_expected.to be false }
         end
@@ -147,18 +146,16 @@ describe NormalizedProperties::Dependent::Set do
         set_owner.property(:set).added! item4
       end
 
-      let(:item4){ Item.new }
-
       before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
       before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
       let(:addition_callback){ proc{} }
       let(:change_callback){ proc{} }
 
-      before{ expect(addition_callback).to receive(:call).with(DependentItem.new item4) }
+      before{ expect(addition_callback).to receive(:call).with(dependent_item4) }
       before{ expect(change_callback).to receive(:call) }
       it{ is_expected.not_to raise_error }
-      after{ expect(dependent_set.value).to eq [DependentItem.new(item1), DependentItem.new(item2),
-        DependentItem.new(item3), DependentItem.new(item4)] }
+      after{ expect(dependent_set.value).to eq [dependent_item1, dependent_item2, dependent_item3,
+        dependent_item4] }
     end
 
     describe "watching the removal of an item" do
@@ -172,10 +169,10 @@ describe NormalizedProperties::Dependent::Set do
       let(:removal_callback){ proc{} }
       let(:change_callback){ proc{} }
 
-      before{ expect(removal_callback).to receive(:call).with(DependentItem.new item2) }
+      before{ expect(removal_callback).to receive(:call).with(dependent_item2) }
       before{ expect(change_callback).to receive(:call) }
       it{ is_expected.not_to raise_error }
-      after{ expect(dependent_set.value).to eq [DependentItem.new(item1), DependentItem.new(item3)] }
+      after{ expect(dependent_set.value).to eq [dependent_item1, dependent_item3] }
     end
   end
 
