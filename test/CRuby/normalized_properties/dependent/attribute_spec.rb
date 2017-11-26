@@ -60,6 +60,20 @@ describe NormalizedProperties::Dependent::Attribute do
       it{ is_expected.not_to raise_error }
       after{ expect(dependent_attribute.value).to eq 'symbol_dependent_changed_value' }
     end
+
+    describe "#satisfies?" do
+      subject{ dependent_attribute.satisfies? filter }
+
+      context "when the attribute does not satisfy the filter" do
+        let(:filter){ "another_value" }
+        it{ is_expected.to be false }
+      end
+
+      context "when the attribute satisfies the filter" do
+        let(:filter){ "symbol_dependent_attribute_value" }
+        it{ is_expected.to be true }
+      end
+    end
   end
 
   context "when the attribute has an array source" do
@@ -79,6 +93,20 @@ describe NormalizedProperties::Dependent::Attribute do
       before{ expect(callback).to receive(:call) }
       it{ is_expected.not_to raise_error }
       after{ expect(dependent_attribute.value).to eq 'array_dependent_changed_value' }
+    end
+
+    describe "#satisfies?" do
+      subject{ dependent_attribute.satisfies? filter }
+
+      context "when the attribute does not satisfy the filter" do
+        let(:filter){ "another_value" }
+        it{ is_expected.to be false }
+      end
+
+      context "when the attribute satisfies the filter" do
+        let(:filter){ "array_dependent_attribute_value" }
+        it{ is_expected.to be true }
+      end
     end
   end
 
@@ -100,6 +128,20 @@ describe NormalizedProperties::Dependent::Attribute do
       it{ is_expected.not_to raise_error }
       after{ expect(dependent_attribute.value).to eq 'hash_dependent_changed_value' }
     end
+
+    describe "#satisfies?" do
+      subject{ dependent_attribute.satisfies? filter }
+
+      context "when the attribute does not satisfy the filter" do
+        let(:filter){ "another_value" }
+        it{ is_expected.to be false }
+      end
+
+      context "when the attribute satisfies the filter" do
+        let(:filter){ "hash_dependent_attribute_value" }
+        it{ is_expected.to be true }
+      end
+    end
   end
 
   context "when the attribute has a mixed source" do
@@ -119,6 +161,20 @@ describe NormalizedProperties::Dependent::Attribute do
       before{ expect(callback).to receive(:call) }
       it{ is_expected.not_to raise_error }
       after{ expect(dependent_attribute.value).to eq 'mixed_dependent_changed_value' }
+    end
+
+    describe "#satisfies?" do
+      subject{ dependent_attribute.satisfies? filter }
+
+      context "when the attribute does not satisfy the filter" do
+        let(:filter){ "another_value" }
+        it{ is_expected.to be false }
+      end
+
+      context "when the attribute satisfies the filter" do
+        let(:filter){ "mixed_dependent_attribute_value" }
+        it{ is_expected.to be true }
+      end
     end
   end
 end
