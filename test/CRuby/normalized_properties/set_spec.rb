@@ -8,7 +8,7 @@ describe NormalizedProperties::Set do
       end
 
       attr_reader :set
-      normalized_set :set, type: 'Manual'
+      normalized_set :set, type: 'Manual', item_model: 'Item'
     end)
 
     stub_const('Item', Class.new do
@@ -25,6 +25,8 @@ describe NormalizedProperties::Set do
   let(:item1){ Item.new }
   let(:item2){ Item.new }
   let(:item3){ Item.new }
+
+  it{ is_expected.to have_attributes(item_model: Item) }
 
   describe "#satisfies?" do
     subject{ set.satisfies? filter }

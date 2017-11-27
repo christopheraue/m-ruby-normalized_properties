@@ -8,7 +8,7 @@ describe NormalizedProperties::Manual::Set do
       end
 
       attr_reader :set
-      normalized_set :set, type: 'Manual'
+      normalized_set :set, type: 'Manual', item_model: 'Item'
     end)
 
     stub_const('Item', Class.new do
@@ -21,7 +21,7 @@ describe NormalizedProperties::Manual::Set do
       normalized_attribute :association, type: 'Manual'
 
       attr_accessor :set
-      normalized_set :set, type: 'Manual'
+      normalized_set :set, type: 'Manual', item_model: 'ItemProperty'
     end)
 
     stub_const('ItemProperty', Class.new do

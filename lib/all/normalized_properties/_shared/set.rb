@@ -7,6 +7,10 @@ module NormalizedProperties
 
     attr_reader :filter
 
+    def item_model
+      @config.item_model
+    end
+
     def satisfies?(filter)
       case filter
       when true

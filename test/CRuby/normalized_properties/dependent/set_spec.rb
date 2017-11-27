@@ -8,29 +8,29 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       attr_reader :set
-      normalized_set :set, type: 'Manual'
+      normalized_set :set, type: 'Manual', item_model: 'Item'
 
       def child
         @child ||= self.class.new
       end
       normalized_attribute :child, type: 'Manual'
 
-      normalized_set :symbol_dependent, type: 'Dependent',
+      normalized_set :symbol_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: :set,
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} }
 
-      normalized_set :array_dependent, type: 'Dependent',
+      normalized_set :array_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: [:set],
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} }
 
-      normalized_set :hash_dependent, type: 'Dependent',
+      normalized_set :hash_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: {child: :set},
         value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}} }
 
-      normalized_set :mixed_dependent, type: 'Dependent',
+      normalized_set :mixed_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: {child: [child: :set]},
         value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } },
         filter: ->(filter){ {child: {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}}} }
@@ -49,7 +49,7 @@ describe NormalizedProperties::Dependent::Set do
       normalized_attribute :association, type: 'Manual'
 
       attr_accessor :set
-      normalized_set :set, type: 'Manual'
+      normalized_set :set, type: 'Manual', item_model: 'ItemProperty'
     end)
 
     stub_const('ItemProperty', Class.new do
@@ -91,7 +91,7 @@ describe NormalizedProperties::Dependent::Set do
       def set
         property(:set).value
       end
-      normalized_set :set, type: 'Dependent',
+      normalized_set :set, type: 'Dependent', item_model: 'ItemProperty',
         sources: {item: :set},
         value: ->(sources){ sources[:item][:set].value },
         filter: ->(filter){ {item: {set: filter}} }
