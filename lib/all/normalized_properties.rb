@@ -70,7 +70,7 @@ module NormalizedProperties
                 end
 
     config_class = (namespace.const_defined? :AttributeConfig) ? namespace::AttributeConfig : AttributeConfig
-    @property_configs[name] = config_class.new self, name, namespace, 'Attribute', config
+    @property_configs[name] = config_class.new self, name, namespace, config
   end
 
   def normalized_set(name, config)
@@ -82,7 +82,7 @@ module NormalizedProperties
                 end
 
     config_class = (namespace.const_defined? :SetConfig) ? namespace::SetConfig : SetConfig
-    @property_configs[name] = config_class.new self, name, namespace, 'Set', config
+    @property_configs[name] = config_class.new self, name, namespace, config
   end
 
   def property_config(name)

@@ -1,7 +1,7 @@
 module NormalizedProperties
   module Dependent
     module PropertyConfig
-      def initialize(owner, name, namespace, type, config)
+      def initialize(owner, name, namespace, config)
         super
         @sources = config.fetch :sources
         @value = config.fetch :value
