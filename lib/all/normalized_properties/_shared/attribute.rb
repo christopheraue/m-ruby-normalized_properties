@@ -1,7 +1,7 @@
 module NormalizedProperties
   class Attribute < Property
     def value_model
-      @config.value_model
+      @config.model
     end
 
     def satisfies?(filter)
