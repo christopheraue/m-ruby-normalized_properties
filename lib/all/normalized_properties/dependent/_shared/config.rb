@@ -42,6 +42,10 @@ module NormalizedProperties
           [sources]
         end
       end
+
+      def resolve_filter(filter, opts)
+        opts.fetch(:into).merge! @filter_mapper.call filter
+      end
     end
   end
 end

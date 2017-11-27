@@ -28,7 +28,7 @@ module NormalizedProperties
       if filter.empty?
         self
       else
-        self.class.new @owner, @config, merge_filter(@filter, filter)
+        self.class.new @owner, @config, merge_filter(@filter, item_model.resolve_dependent_filter(filter))
       end
     end
 

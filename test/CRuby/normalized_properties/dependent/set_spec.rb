@@ -148,6 +148,12 @@ describe NormalizedProperties::Dependent::Set do
     it{ is_expected.to have_attributes(name: property_name) }
     it{ is_expected.to have_attributes(to_s: "#{dependent_owner}##{property_name}") }
 
+    describe "#filter" do
+      subject{ dependent_set.filter }
+      let(:dependent_set){ dependent_owner.property(property_name).where association: true }
+      it{ is_expected.to eq(item: {association: true}) }
+    end
+
     describe "#value" do
       subject{ dependent_set.value }
 

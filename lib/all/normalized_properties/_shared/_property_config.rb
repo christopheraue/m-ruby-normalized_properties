@@ -8,5 +8,9 @@ module NormalizedProperties
     end
 
     attr_reader :owner, :name, :namespace
+
+    def resolve_filter(filter, opts)
+      opts.fetch(:into)[@name] = filter
+    end
   end
 end
