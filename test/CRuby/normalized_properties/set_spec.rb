@@ -85,11 +85,17 @@ describe NormalizedProperties::Set do
       end
 
       context "when the filter is not empty" do
+        before{ Item.normalized_attribute :attribute, type: 'Manual' }
+
         let(:filter){ {attribute: 'value'} }
         it{ is_expected.to be_a(described_class).and have_attributes(filter: filter) }
       end
 
       context "when the set is filtered twice" do
+        before{ Item.normalized_attribute :this, type: 'Manual' }
+        before{ Item.normalized_attribute :nested, type: 'Manual' }
+        before{ Item.normalized_attribute :second, type: 'Manual' }
+
         let(:set){ owner.property(:set).where(this: {will: 'be replaced'}, nested: 'filter') }
         let(:filter){ {this: {will: 'stay'}, second: 'filter'} }
         it{ is_expected.to be_a(described_class).and have_attributes(

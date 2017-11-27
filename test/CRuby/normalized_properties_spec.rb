@@ -47,7 +47,9 @@ describe NormalizedProperties do
 
     context "when the property is not known" do
       let(:name){ :name2 }
-      it{ is_expected.to be nil }
+      before{ stub_const('PropertyOwner', model) }
+      it{ is_expected.to raise_error NormalizedProperties::Error,
+        "property PropertyOwner##{name} does not exist" }
 
       context "when a superclass knows the property" do
         let(:super_model){ Class.new{ extend NormalizedProperties } }

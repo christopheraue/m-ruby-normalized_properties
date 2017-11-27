@@ -33,11 +33,7 @@ module NormalizedProperties
   module Instance
     def property(name)
       @properties ||= {}
-      @properties[name] ||= if config = self.class.property_config(name)
-                              config.to_property_for self
-                            else
-                              raise Error, "property #{self.class.name}##{name} does not exist"
-                            end
+      @properties[name] ||= self.class.property_config(name).to_property_for self
     end
 
     def satisfies?(filter)
@@ -85,9 +81,10 @@ module NormalizedProperties
     @property_configs[name] = config_class.new self, name, namespace, config
   end
 
-  def property_config(name)
-    @property_configs[name] or if superclass.singleton_class.include? NormalizedProperties
-                                 superclass.property_config name
-                               end
+  def property_config(prop_name)
+    config = (@property_configs[prop_name] or if superclass.singleton_class.include? NormalizedProperties
+                                                superclass.property_config prop_name
+                                              end)
+    config or raise Error, "property #{name}##{prop_name} does not exist"
   end
 end
