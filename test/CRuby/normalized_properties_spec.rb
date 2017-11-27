@@ -59,4 +59,27 @@ describe NormalizedProperties do
       end
     end
   end
+
+  describe ".owns_property?" do
+    subject{ model.owns_property? name }
+
+    context "when the property has been defined" do
+      let(:name){ :name }
+      before{ model.normalized_attribute name, type: 'Manual' }
+      it{ is_expected.to be true }
+    end
+
+    context "when the property is not known" do
+      let(:name){ :name2 }
+      before{ stub_const('PropertyOwner', model) }
+      it{ is_expected.to be false }
+
+      context "when a superclass knows the property" do
+        let(:super_model){ Class.new{ extend NormalizedProperties } }
+        let(:model){ Class.new(super_model) }
+        before{ super_model.normalized_attribute name, type: 'Manual' }
+        it{ is_expected.to be true }
+      end
+    end
+  end
 end

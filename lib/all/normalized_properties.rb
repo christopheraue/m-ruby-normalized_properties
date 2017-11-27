@@ -81,6 +81,14 @@ module NormalizedProperties
     @property_configs[name] = config_class.new self, name, namespace, config
   end
 
+  def owns_property?(name)
+    @property_configs.key? name or if superclass.singleton_class.include? NormalizedProperties
+                                     superclass.owns_property? name
+                                   else
+                                     false
+                                   end
+  end
+
   def property_config(prop_name)
     config = (@property_configs[prop_name] or if superclass.singleton_class.include? NormalizedProperties
                                                 superclass.property_config prop_name
