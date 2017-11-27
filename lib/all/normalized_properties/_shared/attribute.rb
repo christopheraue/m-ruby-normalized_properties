@@ -1,5 +1,9 @@
 module NormalizedProperties
   class Attribute < Property
+    def value_model
+      @config.value_model
+    end
+
     def satisfies?(filter)
       case value = self.value
       when NormalizedProperties::Instance

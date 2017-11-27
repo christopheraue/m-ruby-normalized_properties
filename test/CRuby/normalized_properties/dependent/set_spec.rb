@@ -46,7 +46,7 @@ describe NormalizedProperties::Dependent::Set do
       normalized_attribute :attribute, type: 'Manual'
 
       attr_accessor :association
-      normalized_attribute :association, type: 'Manual'
+      normalized_attribute :association, type: 'Manual', value_model: 'ItemProperty'
 
       attr_accessor :set
       normalized_set :set, type: 'Manual', item_model: 'ItemProperty'
@@ -83,7 +83,7 @@ describe NormalizedProperties::Dependent::Set do
       def association
         property(:association).value
       end
-      normalized_attribute :association, type: 'Dependent',
+      normalized_attribute :association, type: 'Dependent', value_model: 'ItemProperty',
         sources: {item: :association},
         value: ->(sources){ sources[:item][:association].value },
         filter: ->(filter){ {item: {association: filter}} }

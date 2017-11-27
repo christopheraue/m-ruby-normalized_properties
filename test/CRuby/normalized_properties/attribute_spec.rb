@@ -8,11 +8,13 @@ describe NormalizedProperties::Attribute do
     end)
   end
 
+  subject(:attribute){ owner.property :attribute }
+  let(:owner){ PropertyOwner.new }
+
+  it{ is_expected.to have_attributes(value_model: nil) }
+
   describe "#satisfies?" do
     subject{ attribute.satisfies? filter }
-
-    let(:attribute){ owner.property :attribute }
-    let(:owner){ PropertyOwner.new }
 
     before do
       PropertyOwner.class_eval do

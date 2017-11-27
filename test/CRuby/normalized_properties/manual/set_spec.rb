@@ -18,7 +18,7 @@ describe NormalizedProperties::Manual::Set do
       normalized_attribute :attribute, type: 'Manual'
 
       attr_accessor :association
-      normalized_attribute :association, type: 'Manual'
+      normalized_attribute :association, type: 'Manual', value_model: 'ItemProperty'
 
       attr_accessor :set
       normalized_set :set, type: 'Manual', item_model: 'ItemProperty'
