@@ -69,11 +69,8 @@ module NormalizedProperties
                   raise Error, "unknown property type #{type.inspect}"
                 end
 
-    @property_configs[name] = if config.empty?
-                                PropertyConfig.new self, name, namespace, 'Attribute'
-                              else
-                                namespace::Config.new self, name, namespace, 'Attribute', config
-                              end
+    config_class = (namespace.const_defined? :Config) ? namespace::Config : PropertyConfig
+    @property_configs[name] = config_class.new self, name, namespace, 'Attribute', config
   end
 
   def normalized_set(name, config)
@@ -84,11 +81,8 @@ module NormalizedProperties
                   raise Error, "unknown property type #{type.inspect}"
                 end
 
-    @property_configs[name] = if config.empty?
-                                PropertyConfig.new self, name, namespace, 'Set'
-                              else
-                                namespace::Config.new self, name, namespace, 'Set', config
-                              end
+    config_class = (namespace.const_defined? :Config) ? namespace::Config : PropertyConfig
+    @property_configs[name] = config_class.new self, name, namespace, 'Set', config
   end
 
   def property_config(name)

@@ -2,7 +2,7 @@ module NormalizedProperties
   module Dependent
     class Config < PropertyConfig
       def initialize(owner, name, namespace, type, config)
-        super owner, name, namespace, type
+        super owner, name, namespace, type, config
         @sources = config.fetch :sources
         @value = config.fetch :value
         @filter_mapper = config.fetch :filter
