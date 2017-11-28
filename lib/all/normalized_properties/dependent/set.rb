@@ -12,7 +12,7 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter = @config.filter_mapper.call filter
+        filter = @config.sources_filter.call filter
         filter.all? do |prop_name, prop_filter|
           owner.property(prop_name).satisfies? prop_filter
         end

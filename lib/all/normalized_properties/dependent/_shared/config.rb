@@ -5,10 +5,10 @@ module NormalizedProperties
         super
         @sources = config.fetch :sources
         @value = config.fetch :value
-        @filter_mapper = config.fetch :filter
+        @sources_filter = config.fetch :sources_filter
       end
 
-      attr_reader :value, :filter_mapper
+      attr_reader :value, :sources_filter
 
       def sources(owner, sources = @sources)
         result = {}
@@ -44,7 +44,7 @@ module NormalizedProperties
       end
 
       def resolve_filter(filter, opts)
-        opts.fetch(:into).merge! @filter_mapper.call filter
+        opts.fetch(:into).merge! @sources_filter.call filter
       end
     end
   end

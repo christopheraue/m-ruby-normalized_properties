@@ -25,23 +25,23 @@ describe NormalizedProperties::Dependent::Attribute do
 
         normalized_attribute :symbol_dependent, type: 'Dependent',
           sources: :attribute,
-          value: ->(sources){ "dependent_#{sources[:attribute].value}" },
-          filter: ->(filter){ {attribute: filter.sub("dependent_", "")} }
+          sources_filter: ->(filter){ {attribute: filter.sub("dependent_", "")} },
+          value: ->(sources){ "dependent_#{sources[:attribute].value}" }
 
         normalized_attribute :array_dependent, type: 'Dependent',
           sources: [:attribute],
-          value: ->(sources){ "dependent_#{sources[:attribute].value}" },
-          filter: ->(filter){ {attribute: filter.sub("dependent_", "")} }
+          sources_filter: ->(filter){ {attribute: filter.sub("dependent_", "")} },
+          value: ->(sources){ "dependent_#{sources[:attribute].value}" }
 
         normalized_attribute :hash_dependent, type: 'Dependent',
           sources: {child: :attribute},
-          value: ->(sources){ "dependent_#{sources[:child][:attribute].value}" },
-          filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} }
+          sources_filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} },
+          value: ->(sources){ "dependent_#{sources[:child][:attribute].value}" }
 
         normalized_attribute :mixed_dependent, type: 'Dependent',
           sources: {child: [child: :attribute]},
-          value: ->(sources){ "dependent_#{sources[:child][:child][:attribute].value}" },
-          filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} }
+          sources_filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} },
+          value: ->(sources){ "dependent_#{sources[:child][:child][:attribute].value}" }
       end
     end
 
@@ -147,8 +147,8 @@ describe NormalizedProperties::Dependent::Attribute do
 
           normalized_attribute :object_dependent, type: 'Dependent', value_model: 'DependentObject',
             sources: :object,
-            value: ->(sources){ DependentObject.new sources[:object].value },
-            filter: ->(filter){ {object: (filter.is_a? DependentObject) ? filter.object : filter} }
+            sources_filter: ->(filter){ {object: (filter.is_a? DependentObject) ? filter.object : filter} },
+            value: ->(sources){ DependentObject.new sources[:object].value }
         end
       end
 
@@ -220,8 +220,8 @@ describe NormalizedProperties::Dependent::Attribute do
 
           normalized_attribute :set_dependent, type: 'Dependent', value_model: 'DependentObject',
             sources: :set,
+            sources_filter: ->(filter){ {set: (filter.is_a? DependentObject) ? filter.object : filter} },
             value: ->(sources){ DependentObject.new sources[:set].value.find{ |item| item.value == 'item2' } },
-            filter: ->(filter){ {set: (filter.is_a? DependentObject) ? filter.object : filter} },
             value_filter: ->(value){ {id: value.object.id} }
         end
       end

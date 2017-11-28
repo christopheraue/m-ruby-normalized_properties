@@ -17,23 +17,23 @@ describe NormalizedProperties::Dependent::Set do
 
       normalized_set :symbol_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: :set,
-        value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} }
+        sources_filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} },
+        value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } }
 
       normalized_set :array_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: [:set],
-        value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} }
+        sources_filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} },
+        value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } }
 
       normalized_set :hash_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: {child: :set},
-        value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}} }
+        sources_filter: ->(filter){ {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}} },
+        value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } }
 
       normalized_set :mixed_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: {child: [child: :set]},
-        value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } },
-        filter: ->(filter){ {child: {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}}} }
+        sources_filter: ->(filter){ {child: {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}}} },
+        value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } }
     end)
 
     stub_const('Item', Class.new do
@@ -77,24 +77,24 @@ describe NormalizedProperties::Dependent::Set do
 
       normalized_attribute :attribute, type: 'Dependent',
         sources: {item: :attribute},
-        value: ->(sources){ sources[:item][:attribute].value },
-        filter: ->(filter){ {item: {attribute: filter}} }
+        sources_filter: ->(filter){ {item: {attribute: filter}} },
+        value: ->(sources){ sources[:item][:attribute].value }
 
       def association
         property(:association).value
       end
       normalized_attribute :association, type: 'Dependent', value_model: 'ItemProperty',
         sources: {item: :association},
-        value: ->(sources){ sources[:item][:association].value },
-        filter: ->(filter){ {item: {association: filter}} }
+        sources_filter: ->(filter){ {item: {association: filter}} },
+        value: ->(sources){ sources[:item][:association].value }
 
       def set
         property(:set).value
       end
       normalized_set :set, type: 'Dependent', item_model: 'ItemProperty',
         sources: {item: :set},
-        value: ->(sources){ sources[:item][:set].value },
-        filter: ->(filter){ {item: {set: filter}} }
+        sources_filter: ->(filter){ {item: {set: filter}} },
+        value: ->(sources){ sources[:item][:set].value }
 
       def ==(other)
         @item == other.item
