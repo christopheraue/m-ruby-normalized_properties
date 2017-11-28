@@ -5,13 +5,26 @@ describe NormalizedProperties::Attribute do
 
       attr_accessor :attribute
       normalized_attribute :attribute, type: 'Manual'
+
+      attr_accessor :association
+      normalized_attribute :association, type: 'Manual', value_model: 'PropertyOwner'
     end)
   end
 
   subject(:attribute){ owner.property :attribute }
   let(:owner){ PropertyOwner.new }
 
-  it{ is_expected.to have_attributes(value_model: nil) }
+  describe "#value_model" do
+    context "when it's a simple attribute" do
+      subject{ owner.property :attribute }
+      it{ is_expected.to have_attributes(value_model: nil) }
+    end
+
+    context "when it's an association attribute" do
+      subject{ owner.property :association }
+      it{ is_expected.to have_attributes(value_model: PropertyOwner) }
+    end
+  end
 
   describe "#satisfies?" do
     subject{ attribute.satisfies? filter }
