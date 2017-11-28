@@ -10,9 +10,15 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter = @config.filter_mapper.call filter
-        filter.all? do |prop_name, prop_filter|
-          owner.property(prop_name).satisfies? prop_filter
+        case filter
+        when Hash
+          filter.merge! @config.value_filter.call value if @config.value_filter
+          filter = @config.filter_mapper.call filter
+          filter.all? do |prop_name, prop_filter|
+            owner.property(prop_name).satisfies? prop_filter
+          end
+        else
+          filter == value
         end
       end
     end
