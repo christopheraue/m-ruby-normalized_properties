@@ -99,9 +99,9 @@ module NormalizedProperties
   def resolve_dependent_filter(filter)
     return filter unless filter.is_a? Hash
 
-    resolved_filter = filter.inject({}) do |resolved_filter, (prop_name, prop_filter)|
-      property_config(prop_name).resolve_filter prop_filter, into: resolved_filter
-      resolved_filter
+    resolved_filter = {}
+    filter.each do |prop_name, prop_filter|
+      resolved_filter.merge! property_config(prop_name).resolve_filter prop_filter
     end
 
     resolved_filter.each do |prop_name, prop_filter|

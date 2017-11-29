@@ -43,8 +43,12 @@ module NormalizedProperties
         end
       end
 
-      def resolve_filter(filter, opts)
-        opts.fetch(:into).merge! @sources_filter.call filter
+      def resolve_filter(filter)
+        resolved_filter = {}
+        @sources_filter.call(filter).each do |prop_name, prop_filter|
+          resolved_filter.merge! @owner.property_config(prop_name).resolve_filter prop_filter
+        end
+        resolved_filter
       end
     end
   end

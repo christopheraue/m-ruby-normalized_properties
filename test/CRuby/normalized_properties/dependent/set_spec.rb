@@ -330,4 +330,47 @@ describe NormalizedProperties::Dependent::Set do
     let(:set_owner){ dependent_owner.child.child }
     include_examples "for a set property", :mixed_dependent
   end
+
+  describe "filtering a set by dependent properties of its items" do
+    before do
+      class Item
+        normalized_attribute :dependent_attribute, type: 'Dependent', value_model: 'DependentItem',
+          sources: :attribute,
+          sources_filter: ->(filter){ {attribute: (filter.is_a? DependentItem) ? filter.item : filter} },
+          value: ->(sources){ DependentItem.new sources[:attribute].value }
+
+        normalized_attribute :dependent_dependent_attribute, type: 'Dependent', item_model: 'ItemProperty',
+          sources: :dependent_attribute,
+          sources_filter: ->(filter){ {dependent_attribute: filter} },
+          value: ->(sources){ sources[:dependent_attribute].value }
+      end
+    end
+
+    let(:owner){ SetOwner.new [item1, item2, item3] }
+    let(:item1){ Item.new.tap{ |item| item.attribute = 'item1' } }
+    let(:item2){ Item.new.tap{ |item| item.attribute = 'item2' } }
+    let(:item3){ Item.new.tap{ |item| item.attribute = 'item3' } }
+
+    context "when the set has not been filtered" do
+      subject{ owner.property :set }
+      it{ is_expected.to have_attributes filter: {} }
+      it{ is_expected.to have_attributes value: [item1, item2, item3] }
+    end
+
+    context "when the set has been filtered" do
+      subject{ owner.property(:set).where filter }
+
+      context "when filtering by a dependent property" do
+        let(:filter){ {dependent_attribute: 'item2'} }
+        it{ is_expected.to have_attributes filter: {attribute: 'item2'} }
+        it{ is_expected.to have_attributes value: [item2] }
+      end
+
+      context "when filtering by a dependent property depending on another dependent property" do
+        let(:filter){ {dependent_dependent_attribute: 'item2'} }
+        it{ is_expected.to have_attributes filter: {attribute: 'item2'} }
+        it{ is_expected.to have_attributes value: [item2] }
+      end
+    end
+  end
 end
