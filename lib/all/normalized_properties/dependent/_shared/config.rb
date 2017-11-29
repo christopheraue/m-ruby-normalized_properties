@@ -15,7 +15,7 @@ module NormalizedProperties
         case sources
         when Hash
           sources.each do |prop_name, prop_sources|
-            if prop_owner = owner.__send__(prop_name)
+            if prop_owner = owner.property(prop_name).value
               result[prop_name] = {__self__: (owner.property prop_name)}
               result[prop_name].merge! sources(prop_owner, prop_sources)
             else
