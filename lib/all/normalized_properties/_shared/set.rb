@@ -7,6 +7,10 @@ module NormalizedProperties
 
     attr_reader :filter
 
+    def dependencies_resolved_filter
+      item_model.resolve_dependent_filter @filter
+    end
+
     def item_model
       @config.model
     end
@@ -28,7 +32,7 @@ module NormalizedProperties
       if filter.empty?
         self
       else
-        self.class.new @owner, @config, merge_filter(@filter, item_model.resolve_dependent_filter(filter))
+        self.class.new @owner, @config, merge_filter(@filter, filter)
       end
     end
 

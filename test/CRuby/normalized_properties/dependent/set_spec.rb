@@ -151,6 +151,12 @@ describe NormalizedProperties::Dependent::Set do
     describe "#filter" do
       subject{ dependent_set.filter }
       let(:dependent_set){ dependent_owner.property(property_name).where association: true }
+      it{ is_expected.to eq(association: true) }
+    end
+
+    describe "#dependencies_resolved_filter" do
+      subject{ dependent_set.dependencies_resolved_filter }
+      let(:dependent_set){ dependent_owner.property(property_name).where association: true }
       it{ is_expected.to eq(item: {association: true}) }
     end
 
@@ -362,13 +368,15 @@ describe NormalizedProperties::Dependent::Set do
 
       context "when filtering by a dependent property" do
         let(:filter){ {dependent_attribute: 'item2'} }
-        it{ is_expected.to have_attributes filter: {attribute: 'item2'} }
+        it{ is_expected.to have_attributes filter: {dependent_attribute: 'item2'} }
+        it{ is_expected.to have_attributes dependencies_resolved_filter: {attribute: 'item2'} }
         it{ is_expected.to have_attributes value: [item2] }
       end
 
       context "when filtering by a dependent property depending on another dependent property" do
         let(:filter){ {dependent_dependent_attribute: 'item2'} }
-        it{ is_expected.to have_attributes filter: {attribute: 'item2'} }
+        it{ is_expected.to have_attributes filter: {dependent_dependent_attribute: 'item2'} }
+        it{ is_expected.to have_attributes dependencies_resolved_filter: {attribute: 'item2'} }
         it{ is_expected.to have_attributes value: [item2] }
       end
     end
