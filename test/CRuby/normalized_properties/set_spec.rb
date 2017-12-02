@@ -25,6 +25,8 @@ describe NormalizedProperties::Set do
   let(:item1){ Item.new }
   let(:item2){ Item.new }
   let(:item3){ Item.new }
+  let(:item4){ Item.new }
+  let(:item5){ Item.new }
 
   it{ is_expected.to have_attributes(item_model: Item) }
 
@@ -63,9 +65,76 @@ describe NormalizedProperties::Set do
       end
 
       context "when the set does not contain the item" do
-        before{ owner.set.delete item2 }
-        let(:filter){ {id: item2.id} }
+        let(:filter){ {id: item4.id} }
         it{ is_expected.to be false }
+      end
+    end
+
+    context "when filtering by a combination of filters" do
+      let(:filter){ NormalizedProperties::Filter.new(op, filter1, filter2) }
+
+      context "when all filters must by satisfied by any items of the set" do
+        let(:op){ :all }
+
+        context "when the property satisfies the filter" do
+          let(:filter1){ {id: item1.id} }
+          let(:filter2){ {id: item2.id} }
+          it{ is_expected.to be true }
+        end
+
+        context "when the property does not satisfy the filter" do
+          let(:filter1){ {id: item1.id} }
+          let(:filter2){ {id: item4.id} }
+          it{ is_expected.to be false }
+        end
+      end
+
+      context "when some filters must by satisfied" do
+        let(:op){ :some }
+
+        context "when the property satisfies the filter" do
+          let(:filter1){ {id: item1.id} }
+          let(:filter2){ {id: item4.id} }
+          it{ is_expected.to be true }
+        end
+
+        context "when the property does not satisfy the filter" do
+          let(:filter1){ {id: item4.id} }
+          let(:filter2){ {id: item5.id} }
+          it{ is_expected.to be false }
+        end
+      end
+
+      context "when exactly one and no more filters must by satisfied" do
+        let(:op){ :one }
+
+        context "when the property satisfies the filter" do
+          let(:filter1){ {id: item1.id} }
+          let(:filter2){ {id: item4.id} }
+          it{ is_expected.to be true }
+        end
+
+        context "when the property does not satisfy the filter" do
+          let(:filter1){ {id: item1.id} }
+          let(:filter2){ {id: item2.id} }
+          it{ is_expected.to be false }
+        end
+      end
+
+      context "when none of the given filters must by satisfied" do
+        let(:op){ :none }
+
+        context "when the property satisfies the filter" do
+          let(:filter1){ {id: item4.id} }
+          let(:filter2){ {id: item5.id} }
+          it{ is_expected.to be true }
+        end
+
+        context "when the property does not satisfy the filter" do
+          let(:filter1){ {id: item1.id} }
+          let(:filter2){ {id: item4.id} }
+          it{ is_expected.to be false }
+        end
       end
     end
   end

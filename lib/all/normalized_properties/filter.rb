@@ -9,8 +9,13 @@ module NormalizedProperties
     end
 
     def satisfied_by?(property)
-      value = property.value
-      satisfy = ->(filter){ value.satisfies? filter }
+      satisfy = if property.is_a? Set
+                  items = property.value
+                  ->(filter){ items.any?{ |item| item.satisfies? filter } }
+                else
+                  value = property.value
+                  ->(filter){ value.satisfies? filter }
+                end
 
       case @op
       when :all

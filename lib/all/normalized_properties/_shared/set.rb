@@ -21,6 +21,8 @@ module NormalizedProperties
         not value.empty?
       when false
         value.empty?
+      when Filter
+        filter.satisfied_by? self
       else
         value.any?{ |item| item.satisfies? filter }
       end
