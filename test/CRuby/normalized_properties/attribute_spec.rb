@@ -6,6 +6,9 @@ describe NormalizedProperties::Attribute do
       attr_accessor :attribute
       normalized_attribute :attribute, type: 'Manual'
 
+      attr_accessor :attribute2
+      normalized_attribute :attribute2, type: 'Manual'
+
       attr_accessor :association
       normalized_attribute :association, type: 'Manual', value_model: 'PropertyOwner'
     end)
@@ -57,6 +60,7 @@ describe NormalizedProperties::Attribute do
       let(:association) do
         PropertyOwner.new.tap do |association|
           association.attribute = 'attribute_value'
+          association.attribute2 = 'attribute2_value'
         end
       end
       before{ owner.attribute = association }
@@ -151,6 +155,74 @@ describe NormalizedProperties::Attribute do
 
           context "when no object is associated" do
             let(:association){ nil }
+            it{ is_expected.to be false }
+          end
+        end
+      end
+
+      context "when filtering by a combination of filters" do
+        let(:filter){ NormalizedProperties::Filter.new(op, filter1, filter2) }
+
+        context "when all filters must by satisfied" do
+          let(:op){ :all }
+
+          context "when the property satisfies the filter" do
+            let(:filter1){ {attribute: 'attribute_value'} }
+            let(:filter2){ {attribute2: 'attribute2_value'} }
+            it{ is_expected.to be true }
+          end
+
+          context "when the property does not satisfy the filter" do
+            let(:filter1){ {attribute: 'another_value'} }
+            let(:filter2){ {attribute2: 'attribute2_value'} }
+            it{ is_expected.to be false }
+          end
+        end
+
+        context "when some filters must by satisfied" do
+          let(:op){ :some }
+
+          context "when the property satisfies the filter" do
+            let(:filter1){ {attribute: 'another_value'} }
+            let(:filter2){ {attribute2: 'attribute2_value'} }
+            it{ is_expected.to be true }
+          end
+
+          context "when the property does not satisfy the filter" do
+            let(:filter1){ {attribute: 'another_value'} }
+            let(:filter2){ {attribute2: 'another_value'} }
+            it{ is_expected.to be false }
+          end
+        end
+
+        context "when exactly one and no more filters must by satisfied" do
+          let(:op){ :one }
+
+          context "when the property satisfies the filter" do
+            let(:filter1){ {attribute: 'another_value'} }
+            let(:filter2){ {attribute2: 'attribute2_value'} }
+            it{ is_expected.to be true }
+          end
+
+          context "when the property does not satisfy the filter" do
+            let(:filter1){ {attribute: 'attribute_value'} }
+            let(:filter2){ {attribute2: 'attribute2_value'} }
+            it{ is_expected.to be false }
+          end
+        end
+
+        context "when none of the given filters must by satisfied" do
+          let(:op){ :none }
+
+          context "when the property satisfies the filter" do
+            let(:filter1){ {attribute: 'another_value'} }
+            let(:filter2){ {attribute2: 'another_value'} }
+            it{ is_expected.to be true }
+          end
+
+          context "when the property does not satisfy the filter" do
+            let(:filter1){ {attribute: 'attribute_value'} }
+            let(:filter2){ {attribute2: 'another_value'} }
             it{ is_expected.to be false }
           end
         end

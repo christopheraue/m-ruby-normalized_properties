@@ -12,6 +12,8 @@ module NormalizedProperties
           true
         when nil
           false
+        when Filter
+          filter.satisfied_by? self
         else
           value.satisfies? filter
         end
