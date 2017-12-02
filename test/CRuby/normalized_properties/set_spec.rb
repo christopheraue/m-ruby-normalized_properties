@@ -142,33 +142,15 @@ describe NormalizedProperties::Set do
   describe "#where" do
     subject{ set.where filter }
 
-    context "when the filter is no hash" do
+    context "when the filter is no hash or filter" do
       let(:filter){ :no_hash }
-      it{ is_expected.to raise_error ArgumentError, 'filter no hash' }
+      it{ is_expected.to raise_error ArgumentError, 'filter no hash or NormalizedProperties::Filter' }
     end
 
     context "when the filter is a hash" do
       context "when the filter is empty" do
         let(:filter){ {} }
-        it{ is_expected.to be(set).and have_attributes(filter: filter) }
-      end
-
-      context "when the filter is not empty" do
-        before{ Item.normalized_attribute :attribute, type: 'Manual' }
-
-        let(:filter){ {attribute: 'value'} }
-        it{ is_expected.to be_a(described_class).and have_attributes(filter: filter) }
-      end
-
-      context "when the set is filtered twice" do
-        before{ Item.normalized_attribute :this, type: 'Manual' }
-        before{ Item.normalized_attribute :nested, type: 'Manual' }
-        before{ Item.normalized_attribute :second, type: 'Manual' }
-
-        let(:set){ owner.property(:set).where(this: {will: 'be replaced'}, nested: 'filter') }
-        let(:filter){ {this: {will: 'stay'}, second: 'filter'} }
-        it{ is_expected.to be_a(described_class).and have_attributes(
-          filter: {this: {will: 'stay'}, nested: 'filter', second: 'filter'}) }
+        it{ is_expected.to be(set) }
       end
     end
   end

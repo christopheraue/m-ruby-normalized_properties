@@ -38,11 +38,13 @@ module NormalizedProperties
 
     def satisfies?(filter)
       filter = {id: filter.property(:id).value} if filter.is_a? self.class
+      filter = Filter.new(:all, filter) if filter.is_a? Hash
 
-      return false unless filter.is_a? Hash
-
-      filter.all? do |prop_name, prop_filter|
-        property(prop_name).satisfies? prop_filter
+      case filter
+      when Filter
+        filter.satisfied_by? self
+      else
+        false
       end
     end
   end
