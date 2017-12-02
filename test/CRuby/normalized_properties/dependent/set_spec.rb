@@ -151,7 +151,7 @@ describe NormalizedProperties::Dependent::Set do
     describe "#filter" do
       subject{ dependent_set.filter }
       let(:dependent_set){ dependent_owner.property(property_name).where association: true }
-      it{ is_expected.to eq(association: true) }
+      it{ is_expected.to have_attributes(op: :all, parts: [association: true]) }
     end
 
     describe "#dependencies_resolved_filter" do
@@ -359,7 +359,7 @@ describe NormalizedProperties::Dependent::Set do
 
     context "when the set has not been filtered" do
       subject{ owner.property :set }
-      it{ is_expected.to have_attributes filter: {} }
+      it{ is_expected.to have_attributes filter: have_attributes(parts: []) }
       it{ is_expected.to have_attributes value: [item1, item2, item3] }
     end
 
@@ -368,14 +368,14 @@ describe NormalizedProperties::Dependent::Set do
 
       context "when filtering by a dependent property" do
         let(:filter){ {dependent_attribute: 'item2'} }
-        it{ is_expected.to have_attributes filter: {dependent_attribute: 'item2'} }
+        it{ is_expected.to have_attributes filter: have_attributes(parts: [{dependent_attribute: 'item2'}]) }
         it{ is_expected.to have_attributes dependencies_resolved_filter: {attribute: 'item2'} }
         it{ is_expected.to have_attributes value: [item2] }
       end
 
       context "when filtering by a dependent property depending on another dependent property" do
         let(:filter){ {dependent_dependent_attribute: 'item2'} }
-        it{ is_expected.to have_attributes filter: {dependent_dependent_attribute: 'item2'} }
+        it{ is_expected.to have_attributes filter: have_attributes(parts: [{dependent_dependent_attribute: 'item2'}]) }
         it{ is_expected.to have_attributes dependencies_resolved_filter: {attribute: 'item2'} }
         it{ is_expected.to have_attributes value: [item2] }
       end

@@ -2,16 +2,22 @@ module NormalizedProperties
   class Filter
     OPS = {all: :all?, some: :any?, one: :one?, none: :none?}.freeze
 
-    def initialize(op, *filters)
+    def initialize(op, *parts)
       @op = op
-      @filters = filters
+      @parts = parts
       @filter_method = OPS[op] or raise "invalid filter op"
+    end
+
+    attr_reader :op
+
+    def parts
+      @parts.dup.freeze
     end
 
     def satisfied_by?(object)
       case object
       when Instance
-        @filters.__send__(@filter_method) do |filter|
+        @parts.__send__(@filter_method) do |filter|
           case filter
           when Filter
             filter.satisfied_by? object
@@ -23,16 +29,16 @@ module NormalizedProperties
         end
       when Set
         items = object.value
-        @filters.__send__(@filter_method){ |filter| items.any?{ |item| item.satisfies? filter } }
+        @parts.__send__(@filter_method){ |filter| items.any?{ |item| item.satisfies? filter } }
       else
         value = object.value
-        @filters.__send__(@filter_method){ |filter| value.satisfies? filter }
+        @parts.__send__(@filter_method){ |filter| value.satisfies? filter }
       end
     end
 
     def and(filter)
       if @op == :all
-        Filter.new :all, *@filters, filter
+        Filter.new :all, *@parts, filter
       else
         Filter.new :all, self, filter
       end
