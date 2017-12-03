@@ -14,19 +14,25 @@ describe NormalizedProperties::Set do
     stub_const('Item', Class.new do
       extend NormalizedProperties
 
+      def initialize(value)
+        @value = value
+      end
+
       alias id __id__
       normalized_attribute :id, type: 'Manual'
+
+      attr_reader :value
+      normalized_attribute :value, type: 'Manual'
     end)
   end
 
   subject(:set){ owner.property :set }
-  let(:owner){ SetOwner.new [item1, item2, item3] }
+  let(:owner){ SetOwner.new [item1, item2] }
 
-  let(:item1){ Item.new }
-  let(:item2){ Item.new }
-  let(:item3){ Item.new }
-  let(:item4){ Item.new }
-  let(:item5){ Item.new }
+  let(:item1){ Item.new 'item1' }
+  let(:item2){ Item.new 'item2' }
+  let(:item3){ Item.new 'item3' }
+  let(:item4){ Item.new 'item4' }
 
   it{ is_expected.to have_attributes(item_model: Item) }
 
@@ -65,7 +71,7 @@ describe NormalizedProperties::Set do
       end
 
       context "when the set does not contain the item" do
-        let(:filter){ {id: item4.id} }
+        let(:filter){ {id: item3.id} }
         it{ is_expected.to be false }
       end
     end
@@ -73,18 +79,18 @@ describe NormalizedProperties::Set do
     context "when filtering by a combination of filters" do
       let(:filter){ NormalizedProperties::Filter.new(op, filter1, filter2) }
 
-      context "when all filters must by satisfied by any items of the set" do
+      context "when all filters must be satisfied by a single items in the set" do
         let(:op){ :all }
 
         context "when the property satisfies the filter" do
           let(:filter1){ {id: item1.id} }
-          let(:filter2){ {id: item2.id} }
+          let(:filter2){ {value: item1.value} }
           it{ is_expected.to be true }
         end
 
         context "when the property does not satisfy the filter" do
           let(:filter1){ {id: item1.id} }
-          let(:filter2){ {id: item4.id} }
+          let(:filter2){ {value: item2.value} }
           it{ is_expected.to be false }
         end
       end
@@ -94,13 +100,13 @@ describe NormalizedProperties::Set do
 
         context "when the property satisfies the filter" do
           let(:filter1){ {id: item1.id} }
-          let(:filter2){ {id: item4.id} }
+          let(:filter2){ {value: item3.value} }
           it{ is_expected.to be true }
         end
 
         context "when the property does not satisfy the filter" do
-          let(:filter1){ {id: item4.id} }
-          let(:filter2){ {id: item5.id} }
+          let(:filter1){ {id: item3.id} }
+          let(:filter2){ {value: item4.value} }
           it{ is_expected.to be false }
         end
       end
@@ -110,13 +116,13 @@ describe NormalizedProperties::Set do
 
         context "when the property satisfies the filter" do
           let(:filter1){ {id: item1.id} }
-          let(:filter2){ {id: item4.id} }
+          let(:filter2){ {value: item2.value} }
           it{ is_expected.to be true }
         end
 
         context "when the property does not satisfy the filter" do
           let(:filter1){ {id: item1.id} }
-          let(:filter2){ {id: item2.id} }
+          let(:filter2){ {value: item1.value} }
           it{ is_expected.to be false }
         end
       end
@@ -125,14 +131,14 @@ describe NormalizedProperties::Set do
         let(:op){ :none }
 
         context "when the property satisfies the filter" do
-          let(:filter1){ {id: item4.id} }
-          let(:filter2){ {id: item5.id} }
+          let(:filter1){ {id: item3.id} }
+          let(:filter2){ {value: item4.value} }
           it{ is_expected.to be true }
         end
 
         context "when the property does not satisfy the filter" do
           let(:filter1){ {id: item1.id} }
-          let(:filter2){ {id: item4.id} }
+          let(:filter2){ {value: item2.value} }
           it{ is_expected.to be false }
         end
       end

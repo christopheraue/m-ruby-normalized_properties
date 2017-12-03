@@ -29,7 +29,7 @@ module NormalizedProperties
         end
       when Set
         items = object.value
-        @parts.__send__(@filter_method){ |filter| items.any?{ |item| item.satisfies? filter } }
+        items.any?{ |item| @parts.__send__(@filter_method){ |filter| item.satisfies? filter } }
       else
         value = object.value
         @parts.__send__(@filter_method){ |filter| value.satisfies? filter }
