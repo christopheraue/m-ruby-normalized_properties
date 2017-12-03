@@ -10,11 +10,9 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter.merge! @config.value_filter.call value if @config.value_filter
-        filter = @config.sources_filter.call filter
-        filter.all? do |prop_name, prop_filter|
-          owner.property(prop_name).satisfies? prop_filter
-        end
+        filter = Filter.new :all, filter if filter.is_a? Hash or filter.is_a? Instance
+        filter = filter.and @config.value_filter.call(value) if @config.value_filter
+        owner.satisfies? Filter.new :all, @config.sources_filter.call(filter)
       end
     end
   end
