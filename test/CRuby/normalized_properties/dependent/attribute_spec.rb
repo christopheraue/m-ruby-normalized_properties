@@ -229,8 +229,7 @@ describe NormalizedProperties::Dependent::Attribute do
 
       let(:item1){ ManualObject.new 'item1' }
       let(:item2){ ManualObject.new 'item2' }
-      let(:item3){ ManualObject.new 'item3' }
-      before{ owner.set = [item1, item2, item3] }
+      before{ owner.set = [item1, item2] }
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :set_dependent) }
