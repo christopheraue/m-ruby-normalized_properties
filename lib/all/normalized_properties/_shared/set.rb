@@ -8,7 +8,7 @@ module NormalizedProperties
     attr_reader :filter
 
     def dependencies_resolved_filter
-      item_model.resolve_dependent_filter @filter
+      @filter.dependencies_resolved item_model
     end
 
     def item_model
