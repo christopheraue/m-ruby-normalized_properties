@@ -37,7 +37,7 @@ module NormalizedProperties
     end
 
     def satisfies?(filter)
-      filter = {id: filter.property(:id).value} if filter.is_a? self.class
+      filter = filter.to_filter if filter.is_a? Instance
       filter = Filter.new(:all, filter) if filter.is_a? Hash
 
       case filter
@@ -47,11 +47,20 @@ module NormalizedProperties
         false
       end
     end
+
+    alias __model_id__ __id__
+    def self.included(klass)
+      klass.normalized_attribute :__model_id__, type: 'Manual'
+    end
+
+    def to_filter
+      {__model_id__: property(:__model_id__).value}
+    end
   end
 
   def self.extended(klass)
-    klass.__send__ :include, Instance
     klass.instance_variable_set :@property_configs, {}
+    klass.__send__ :include, Instance
   end
 
   def inherited(klass)

@@ -34,9 +34,6 @@ describe NormalizedProperties::Attribute do
 
     before do
       PropertyOwner.class_eval do
-        alias id __id__
-        normalized_attribute :id, type: 'Manual'
-
         attr_accessor :attribute
         normalized_attribute :attribute, type: 'Manual'
       end

@@ -31,9 +31,6 @@ describe NormalizedProperties::Manual::Set do
         @content = content
       end
 
-      alias id __id__
-      normalized_attribute :id, type: 'Manual'
-
       attr_reader :content
       normalized_attribute :content, type: 'Manual'
     end)

@@ -17,30 +17,27 @@ describe NormalizedProperties::Dependent::Set do
 
       normalized_set :symbol_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: :set,
-        sources_filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} },
+        sources_filter: ->(filter){ {set: filter} },
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } }
 
       normalized_set :array_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: [:set],
-        sources_filter: ->(filter){ {set: (filter.is_a? DependentItem) ? filter.item : filter} },
+        sources_filter: ->(filter){ {set: filter} },
         value: ->(sources){ sources[:set].value.map{ |item| DependentItem.new item } }
 
       normalized_set :hash_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: {child: :set},
-        sources_filter: ->(filter){ {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}} },
+        sources_filter: ->(filter){ {child: {set: filter}} },
         value: ->(sources){ sources[:child][:set].value.map{ |item| DependentItem.new item } }
 
       normalized_set :mixed_dependent, type: 'Dependent', item_model: 'DependentItem',
         sources: {child: [child: :set]},
-        sources_filter: ->(filter){ {child: {child: {set: (filter.is_a? DependentItem) ? filter.item : filter}}} },
+        sources_filter: ->(filter){ {child: {child: {set: filter}}} },
         value: ->(sources){ sources[:child][:child][:set].value.map{ |item| DependentItem.new item } }
     end)
 
     stub_const('Item', Class.new do
       extend NormalizedProperties
-
-      alias id __id__
-      normalized_attribute :id, type: 'Manual'
 
       attr_accessor :attribute
       normalized_attribute :attribute, type: 'Manual'
@@ -58,9 +55,6 @@ describe NormalizedProperties::Dependent::Set do
       def initialize(content)
         @content = content
       end
-
-      alias id __id__
-      normalized_attribute :id, type: 'Manual'
 
       attr_reader :content
       normalized_attribute :content, type: 'Manual'
@@ -95,6 +89,10 @@ describe NormalizedProperties::Dependent::Set do
         sources: {item: :set},
         sources_filter: ->(filter){ {item: {set: filter}} },
         value: ->(sources){ sources[:item][:set].value }
+
+      def to_filter
+        {__model_id__: item.property(:__model_id__).value}
+      end
 
       def ==(other)
         @item == other.item
@@ -342,7 +340,7 @@ describe NormalizedProperties::Dependent::Set do
       class Item
         normalized_attribute :dependent_attribute, type: 'Dependent', value_model: 'DependentItem',
           sources: :attribute,
-          sources_filter: ->(filter){ {attribute: (filter.is_a? DependentItem) ? filter.item : filter} },
+          sources_filter: ->(filter){ {attribute: filter} },
           value: ->(sources){ DependentItem.new sources[:attribute].value }
 
         normalized_attribute :dependent_dependent_attribute, type: 'Dependent', item_model: 'ItemProperty',
