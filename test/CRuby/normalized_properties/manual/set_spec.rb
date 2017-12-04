@@ -37,7 +37,7 @@ describe NormalizedProperties::Manual::Set do
   end
 
   subject(:set){ owner.property :set }
-  let(:owner){ SetOwner.new [item1, item2, item3] }
+  let(:owner){ SetOwner.new [item1, item2] }
 
   let(:item1) do
     Item.new.tap do |item|
@@ -51,14 +51,6 @@ describe NormalizedProperties::Manual::Set do
     Item.new.tap do |item|
       item.attribute = 'attribute2'
       item.association = nil
-      item.set = [ItemProperty.new('setitem2')]
-    end
-  end
-
-  let(:item3) do
-    Item.new.tap do |item|
-      item.attribute = 'attribute1'
-      item.association = ItemProperty.new('association3')
       item.set = []
     end
   end
@@ -71,7 +63,7 @@ describe NormalizedProperties::Manual::Set do
     subject{ set.value }
 
     context "when the set has not been filtered" do
-      it { is_expected.to eq [item1, item2, item3] }
+      it { is_expected.to eq [item1, item2] }
     end
 
     context "when the set has been filtered" do
@@ -79,7 +71,7 @@ describe NormalizedProperties::Manual::Set do
 
       context "when the filter is empty" do
         let(:filter){ {} }
-        it{ is_expected.to eq [item1, item2, item3] }
+        it{ is_expected.to eq [item1, item2] }
       end
 
       context "when filtering by an unknown property" do
@@ -99,15 +91,15 @@ describe NormalizedProperties::Manual::Set do
         end
 
         context "when multiple items match the filter" do
-          let(:filter){ {attribute: 'attribute1'} }
-          it{ is_expected.to eq [item1, item3] }
+          let(:filter){ NP.or({attribute: 'attribute1'}, {attribute: 'attribute2'})  }
+          it{ is_expected.to eq [item1, item2] }
         end
       end
 
       context "when filtering by an association property of the set items" do
         context "when filtering the items merely by having an association" do
           let(:filter){ {association: true} }
-          it{ is_expected.to eq [item1, item3] }
+          it{ is_expected.to eq [item1] }
         end
 
         context "when filtering the items by having no association" do
@@ -121,8 +113,8 @@ describe NormalizedProperties::Manual::Set do
         end
 
         context "when filtering the items by a directly given association" do
-          let(:filter){ {association: item3.association} }
-          it{ is_expected.to eq [item3] }
+          let(:filter){ {association: item2.association} }
+          it{ is_expected.to eq [item2] }
         end
 
         context "when filtering the items by an invalid filter" do
@@ -134,12 +126,12 @@ describe NormalizedProperties::Manual::Set do
       context "when filtering by a set property of the set items" do
         context "when filtering the items by its subset having items" do
           let(:filter){ {set: true} }
-          it{ is_expected.to eq [item1, item2] }
+          it{ is_expected.to eq [item1] }
         end
 
         context "when filtering the items by its subset having no items" do
           let(:filter){ {set: false} }
-          it{ is_expected.to eq [item3] }
+          it{ is_expected.to eq [item2] }
         end
 
         context "when filtering the items by the properties of their associations" do
@@ -148,8 +140,8 @@ describe NormalizedProperties::Manual::Set do
         end
 
         context "when filtering the items by a directly given association" do
-          let(:filter){ {set: item2.set.first} }
-          it{ is_expected.to eq [item2] }
+          let(:filter){ {set: item1.set.first} }
+          it{ is_expected.to eq [item1] }
         end
 
         context "when filtering the items by an invalid filter" do
@@ -162,21 +154,21 @@ describe NormalizedProperties::Manual::Set do
 
   describe "manual addition of an item" do
     subject do
-      owner.set.push item4
-      owner.property(:set).added! item4
+      owner.set.push item3
+      owner.property(:set).added! item3
     end
 
-    let(:item4){ Item.new }
+    let(:item3){ Item.new }
 
     before{ set.on(:added){ |*args| addition_callback.call *args } }
     before{ set.on(:changed){ |*args| change_callback.call *args } }
     let(:addition_callback){ proc{} }
     let(:change_callback){ proc{} }
 
-    before{ expect(addition_callback).to receive(:call).with(item4) }
+    before{ expect(addition_callback).to receive(:call).with(item3) }
     before{ expect(change_callback).to receive(:call) }
     it{ is_expected.not_to raise_error }
-    after{ expect(set.value).to eq [item1, item2, item3, item4] }
+    after{ expect(set.value).to eq [item1, item2, item3] }
   end
 
   describe "manual removal of an item" do
@@ -193,6 +185,6 @@ describe NormalizedProperties::Manual::Set do
     before{ expect(removal_callback).to receive(:call).with(item2) }
     before{ expect(change_callback).to receive(:call) }
     it{ is_expected.not_to raise_error }
-    after{ expect(set.value).to eq [item1, item3] }
+    after{ expect(set.value).to eq [item1] }
   end
 end
