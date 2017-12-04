@@ -18,7 +18,12 @@ module NormalizedProperties
           value.satisfies? filter
         end
       else
-        value == filter
+        case filter
+        when Filter
+          filter.satisfied_by? value
+        else
+          value == filter
+        end
       end
     end
 

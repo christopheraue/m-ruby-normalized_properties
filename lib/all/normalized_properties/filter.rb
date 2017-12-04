@@ -30,9 +30,18 @@ module NormalizedProperties
       when Set
         items = object.value
         items.any?{ |item| @parts.__send__(@filter_method){ |filter| item.satisfies? filter } }
-      else
+      when Attribute
         value = object.value
         @parts.__send__(@filter_method){ |filter| value.satisfies? filter }
+      else
+        @parts.__send__(@filter_method) do |filter|
+          case filter
+          when Filter
+            filter.satisfied_by? object
+          else
+            object == filter
+          end
+        end
       end
     end
 
