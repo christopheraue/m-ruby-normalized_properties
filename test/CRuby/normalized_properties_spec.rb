@@ -23,16 +23,9 @@ describe NormalizedProperties do
       it{ is_expected.to raise_error NormalizedProperties::Error, "unknown property type \"Unknown\"" }
     end
 
-    context "when defining a set of a known type" do
-      context "when not providing an item model" do
-        let(:config){ {type: 'Manual'} }
-        it{ is_expected.to raise_error KeyError, "key not found: :item_model" }
-      end
-
-      context "when not providing an item model" do
-        let(:config){ {type: 'Manual', item_model: 'Item'} }
-        it{ is_expected.not_to raise_error }
-      end
+    context "when not providing an item model" do
+      let(:config){ {type: 'Manual'} }
+      it{ is_expected.not_to raise_error }
     end
   end
 

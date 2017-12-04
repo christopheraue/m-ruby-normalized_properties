@@ -22,9 +22,17 @@ module NormalizedProperties
       when false
         value.empty?
       when Filter
-        filter.satisfied_by? self
+        if item_model
+          filter.satisfied_by? self
+        else
+          value.any?{ |item| filter.satisfied_by? item }
+        end
       else
-        value.any?{ |item| item.satisfies? filter }
+        if item_model
+          value.any?{ |item| item.satisfies? filter }
+        else
+          value.any?{ |item| item == filter }
+        end
       end
     end
 
