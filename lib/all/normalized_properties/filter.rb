@@ -1,6 +1,6 @@
 module NormalizedProperties
   class Filter
-    OPS = {all: :all?, some: :any?, none: :none?}.freeze
+    OPS = {and: :all?, or: :any?, not: :none?}.freeze
 
     def initialize(op, *parts)
       @op = op
@@ -37,10 +37,10 @@ module NormalizedProperties
     end
 
     def and(filter)
-      if @op == :all
-        Filter.new :all, *@parts, filter
+      if @op == :and
+        Filter.new :and, *@parts, filter
       else
-        Filter.new :all, self, filter
+        Filter.new :and, self, filter
       end
     end
 

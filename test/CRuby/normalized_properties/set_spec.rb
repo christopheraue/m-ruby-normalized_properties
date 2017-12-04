@@ -77,7 +77,7 @@ describe NormalizedProperties::Set do
       let(:filter){ NormalizedProperties::Filter.new(op, filter1, filter2) }
 
       context "when all filters must be satisfied by a single items in the set" do
-        let(:op){ :all }
+        let(:op){ :and }
 
         context "when the property satisfies the filter" do
           let(:filter1){ {__model_id__: item1.__model_id__} }
@@ -93,7 +93,7 @@ describe NormalizedProperties::Set do
       end
 
       context "when some filters must by satisfied" do
-        let(:op){ :some }
+        let(:op){ :or }
 
         context "when the property satisfies the filter" do
           let(:filter1){ {__model_id__: item1.__model_id__} }
@@ -109,7 +109,7 @@ describe NormalizedProperties::Set do
       end
 
       context "when none of the given filters must by satisfied" do
-        let(:op){ :none }
+        let(:op){ :not }
 
         context "when the property satisfies the filter" do
           let(:filter1){ {__model_id__: item3.__model_id__} }

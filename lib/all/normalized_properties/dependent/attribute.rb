@@ -10,9 +10,9 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter = Filter.new :all, filter if filter.is_a? Hash or filter.is_a? Instance
+        filter = Filter.new :and, filter if filter.is_a? Hash or filter.is_a? Instance
         filter = filter.and @config.value_filter.call(value) if @config.value_filter
-        owner.satisfies? Filter.new :all, @config.sources_filter.call(filter)
+        owner.satisfies? Filter.new :and, @config.sources_filter.call(filter)
       end
     end
   end

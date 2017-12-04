@@ -149,13 +149,13 @@ describe NormalizedProperties::Dependent::Set do
     describe "#filter" do
       subject{ dependent_set.filter }
       let(:dependent_set){ dependent_owner.property(property_name).where association: true }
-      it{ is_expected.to have_attributes(op: :all, parts: [association: true]) }
+      it{ is_expected.to have_attributes(op: :and, parts: [association: true]) }
     end
 
     describe "#dependencies_resolved_filter" do
       subject{ dependent_set.dependencies_resolved_filter }
       let(:dependent_set){ dependent_owner.property(property_name).where association: true }
-      it{ is_expected.to have_attributes(op: :all, parts: [item: {association: true}]) }
+      it{ is_expected.to have_attributes(op: :and, parts: [item: {association: true}]) }
     end
 
     describe "#value" do

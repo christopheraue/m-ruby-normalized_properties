@@ -38,7 +38,7 @@ module NormalizedProperties
 
     def satisfies?(filter)
       filter = filter.to_filter if filter.is_a? Instance
-      filter = Filter.new(:all, filter) if filter.is_a? Hash
+      filter = Filter.new(:and, filter) if filter.is_a? Hash
 
       case filter
       when Filter

@@ -12,7 +12,7 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter = Filter.new :all, @config.sources_filter.call(filter)
+        filter = Filter.new :and, @config.sources_filter.call(filter)
         owner.satisfies? filter
       end
     end

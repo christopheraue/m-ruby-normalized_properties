@@ -2,7 +2,7 @@ module NormalizedProperties
   class Set < Property
     def initialize(owner, config, filter = nil)
       super owner, config
-      @filter = (filter or Filter.new :all)
+      @filter = (filter or Filter.new :and)
     end
 
     attr_reader :filter
