@@ -335,6 +335,97 @@ describe NormalizedProperties::Dependent::Set do
     include_examples "for a set property", :mixed_dependent
   end
 
+  describe "a set selecting a subset of the set it depends on" do
+    subject(:dependent_set){ owner.property :set_dependent }
+
+    before do
+      class SetOwner
+        normalized_set :set_dependent, type: 'Dependent', item_model: 'DependentItem',
+          sources: :set,
+          sources_filter: ->(filter){ {set: filter} },
+          value: ->(sources){ sources[:set].value.select{ |item| item.attribute == 'odd' }.map{ |item| DependentItem.new item } },
+          value_filter: ->(value){ {__model_id__: (NP.or *value.map(&:item).map(&:__model_id__))} }
+      end
+    end
+
+    let(:owner){ SetOwner.new [item1, item2, item3] }
+    let(:item1){ Item.new.tap{ |item| item.attribute = 'odd' } }
+    let(:item2){ Item.new.tap{ |item| item.attribute = 'even' } }
+    let(:item3){ Item.new.tap{ |item| item.attribute = 'odd' } }
+    let(:item5){ Item.new.tap{ |item| item.attribute = 'odd' } }
+    let(:dependent_item1){ DependentItem.new item1 }
+    let(:dependent_item2){ DependentItem.new item2 }
+    let(:dependent_item3){ DependentItem.new item3 }
+    let(:dependent_item5){ DependentItem.new item5 }
+
+    it{ is_expected.to have_attributes(owner: owner) }
+    it{ is_expected.to have_attributes(name: :set_dependent) }
+    it{ is_expected.to have_attributes(to_s: "#{owner}#set_dependent") }
+    it{ is_expected.to have_attributes(value: [dependent_item1, dependent_item3]) }
+
+    describe "watching the addition of an item" do
+      subject do
+        owner.set.push item5
+        owner.property(:set).added! item5
+      end
+
+      before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
+      before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
+      let(:addition_callback){ proc{} }
+      let(:change_callback){ proc{} }
+
+      before{ expect(addition_callback).to receive(:call).with(dependent_item5) }
+      before{ expect(change_callback).to receive(:call) }
+      it{ is_expected.not_to raise_error }
+      after{ expect(dependent_set.value).to eq [dependent_item1, dependent_item3, dependent_item5] }
+    end
+
+    describe "watching the removal of an item" do
+      subject do
+        owner.set.delete item1
+        owner.property(:set).removed! item1
+      end
+
+      before{ dependent_set.on(:removed){ |*args| removal_callback.call *args } }
+      before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
+      let(:removal_callback){ proc{} }
+      let(:change_callback){ proc{} }
+
+      before{ expect(removal_callback).to receive(:call).with(dependent_item1) }
+      before{ expect(change_callback).to receive(:call) }
+      it{ is_expected.not_to raise_error }
+      after{ expect(dependent_set.value).to eq [dependent_item3] }
+    end
+
+    describe "#satisfies?" do
+      subject{ dependent_set.satisfies? filter }
+
+      context "when the filter is a hash with property sub filters" do
+        context "when the set does not satisfy the filter" do
+          let(:filter){ {attribute: "even"} }
+          it{ is_expected.to be false }
+        end
+
+        context "when the set satisfies the filter" do
+          let(:filter){ {attribute: 'odd'} }
+          it{ is_expected.to be true }
+        end
+      end
+
+      context "when the filter is an item directly" do
+        context "when the set does not satisfy the filter" do
+          let(:filter){ dependent_item2 }
+          it{ is_expected.to be false }
+        end
+
+        context "when the set satisfies the filter" do
+          let(:filter){ dependent_item1 }
+          it{ is_expected.to be true }
+        end
+      end
+    end
+  end
+
   describe "filtering a set by dependent properties of its items" do
     before do
       class Item
