@@ -107,3 +107,5 @@ module NormalizedProperties
     config or raise Error, "property #{name}##{prop_name} does not exist"
   end
 end
+
+NP = NormalizedProperties

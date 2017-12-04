@@ -158,10 +158,8 @@ describe NormalizedProperties::Attribute do
       end
 
       context "when filtering by a combination of filters" do
-        let(:filter){ NormalizedProperties::Filter.new(op, filter1, filter2) }
-
         context "when all filters must by satisfied" do
-          let(:op){ :and }
+          let(:filter){ NP.and filter1, filter2 }
 
           context "when the property satisfies the filter" do
             let(:filter1){ {attribute: 'attribute_value'} }
@@ -177,7 +175,7 @@ describe NormalizedProperties::Attribute do
         end
 
         context "when some filters must by satisfied" do
-          let(:op){ :or }
+          let(:filter){ NP.or filter1, filter2 }
 
           context "when the property satisfies the filter" do
             let(:filter1){ {attribute: 'another_value'} }
@@ -193,7 +191,7 @@ describe NormalizedProperties::Attribute do
         end
 
         context "when none of the given filters must by satisfied" do
-          let(:op){ :not }
+          let(:filter){ NP.not filter1, filter2 }
 
           context "when the property satisfies the filter" do
             let(:filter1){ {attribute: 'another_value'} }
