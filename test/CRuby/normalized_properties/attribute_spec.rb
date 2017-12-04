@@ -192,22 +192,6 @@ describe NormalizedProperties::Attribute do
           end
         end
 
-        context "when exactly one and no more filters must by satisfied" do
-          let(:op){ :one }
-
-          context "when the property satisfies the filter" do
-            let(:filter1){ {attribute: 'another_value'} }
-            let(:filter2){ {attribute2: 'attribute2_value'} }
-            it{ is_expected.to be true }
-          end
-
-          context "when the property does not satisfy the filter" do
-            let(:filter1){ {attribute: 'attribute_value'} }
-            let(:filter2){ {attribute2: 'attribute2_value'} }
-            it{ is_expected.to be false }
-          end
-        end
-
         context "when none of the given filters must by satisfied" do
           let(:op){ :none }
 

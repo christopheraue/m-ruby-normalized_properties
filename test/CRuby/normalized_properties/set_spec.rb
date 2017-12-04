@@ -108,22 +108,6 @@ describe NormalizedProperties::Set do
         end
       end
 
-      context "when exactly one and no more filters must by satisfied" do
-        let(:op){ :one }
-
-        context "when the property satisfies the filter" do
-          let(:filter1){ {__model_id__: item1.__model_id__} }
-          let(:filter2){ {value: item2.value} }
-          it{ is_expected.to be true }
-        end
-
-        context "when the property does not satisfy the filter" do
-          let(:filter1){ {__model_id__: item1.__model_id__} }
-          let(:filter2){ {value: item1.value} }
-          it{ is_expected.to be false }
-        end
-      end
-
       context "when none of the given filters must by satisfied" do
         let(:op){ :none }
 
