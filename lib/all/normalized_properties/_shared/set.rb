@@ -37,15 +37,10 @@ module NormalizedProperties
     end
 
     def where(filter)
-      case filter
-      when Hash, Filter
-        if filter == {}
-          self
-        else
-          self.class.new @owner, @config, @filter.and(filter)
-        end
+      if filter == {} or filter == nil
+        self
       else
-        raise ArgumentError, "filter no hash or #{NormalizedProperties::Filter}"
+        self.class.new @owner, @config, @filter.and(filter)
       end
     end
 

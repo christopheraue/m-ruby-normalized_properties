@@ -3,12 +3,11 @@ describe NormalizedProperties::Manual::Set do
     stub_const('SetOwner', Class.new do
       extend NormalizedProperties
 
-      def initialize(items = [])
-        @set = items
-      end
-
-      attr_reader :set
+      attr_accessor :set
       normalized_set :set, type: 'Manual', item_model: 'Item'
+
+      attr_accessor :no_model_set
+      normalized_set :no_model_set, type: 'Manual'
     end)
 
     stub_const('Item', Class.new do
@@ -37,7 +36,9 @@ describe NormalizedProperties::Manual::Set do
   end
 
   subject(:set){ owner.property :set }
-  let(:owner){ SetOwner.new [item1, item2] }
+  let(:owner){ SetOwner.new }
+  before{ owner.set = [item1, item2] }
+  before{ owner.no_model_set = %w(item1 item2) }
 
   let(:item1) do
     Item.new.tap do |item|
@@ -62,91 +63,125 @@ describe NormalizedProperties::Manual::Set do
   describe "#value" do
     subject{ set.value }
 
-    context "when the set has not been filtered" do
-      it { is_expected.to eq [item1, item2] }
-    end
-
-    context "when the set has been filtered" do
-      let(:set){ owner.property(:set).where filter }
-
-      context "when the filter is empty" do
-        let(:filter){ {} }
-        it{ is_expected.to eq [item1, item2] }
+    context "when the set has items with a simple value" do
+      context "when the set has not been filtered" do
+        let(:set){ owner.property :no_model_set }
+        it { is_expected.to eq %w(item1 item2) }
       end
 
-      context "when filtering by an unknown property" do
-        let(:filter){ {unknown: 'value'} }
-        it{ is_expected.to raise_error NormalizedProperties::Error, "property Item#unknown does not exist" }
-      end
+      context "when the set has been filtered" do
+        let(:set){ owner.property(:no_model_set).where filter }
 
-      context "when filtering by an attribute property of the set items" do
+        context "when the filter is empty" do
+          let(:filter){ nil }
+          it{ is_expected.to eq %w(item1 item2) }
+        end
+
         context "when no item matches the filter" do
-          let(:filter){ {attribute: 'no_item'} }
+          let(:filter){ 'no_item' }
           it{ is_expected.to eq [] }
         end
 
         context "when one item matches the filter" do
-          let(:filter){ {attribute: 'attribute2'} }
-          it{ is_expected.to eq [item2] }
+          let(:filter){ 'item2' }
+          it{ is_expected.to eq %w(item2) }
         end
 
         context "when multiple items match the filter" do
-          let(:filter){ NP.or({attribute: 'attribute1'}, {attribute: 'attribute2'})  }
+          let(:filter){ NP.or 'item1', 'item2' }
+          it{ is_expected.to eq %w(item1 item2) }
+        end
+      end
+    end
+
+    context "when the set has items of model instances" do
+      context "when the set has not been filtered" do
+        let(:set){ owner.property :set }
+        it { is_expected.to eq [item1, item2] }
+      end
+
+      context "when the set has been filtered" do
+        let(:set){ owner.property(:set).where filter }
+
+        context "when the filter is empty" do
+          let(:filter){ {} }
           it{ is_expected.to eq [item1, item2] }
         end
-      end
 
-      context "when filtering by an association property of the set items" do
-        context "when filtering the items merely by having an association" do
-          let(:filter){ {association: true} }
-          it{ is_expected.to eq [item1] }
+        context "when filtering by an unknown property" do
+          let(:filter){ {unknown: 'value'} }
+          it{ is_expected.to raise_error NormalizedProperties::Error, "property Item#unknown does not exist" }
         end
 
-        context "when filtering the items by having no association" do
-          let(:filter){ {association: nil} }
-          it{ is_expected.to eq [item2] }
+        context "when filtering by an attribute property of the set items" do
+          context "when no item matches the filter" do
+            let(:filter){ {attribute: 'no_item'} }
+            it{ is_expected.to eq [] }
+          end
+
+          context "when one item matches the filter" do
+            let(:filter){ {attribute: 'attribute2'} }
+            it{ is_expected.to eq [item2] }
+          end
+
+          context "when multiple items match the filter" do
+            let(:filter){ NP.or({attribute: 'attribute1'}, {attribute: 'attribute2'})  }
+            it{ is_expected.to eq [item1, item2] }
+          end
         end
 
-        context "when filtering the items by the properties of their associations" do
-          let(:filter){ {association: {content: 'association1'}} }
-          it{ is_expected.to eq [item1] }
+        context "when filtering by an association property of the set items" do
+          context "when filtering the items merely by having an association" do
+            let(:filter){ {association: true} }
+            it{ is_expected.to eq [item1] }
+          end
+
+          context "when filtering the items by having no association" do
+            let(:filter){ {association: nil} }
+            it{ is_expected.to eq [item2] }
+          end
+
+          context "when filtering the items by the properties of their associations" do
+            let(:filter){ {association: {content: 'association1'}} }
+            it{ is_expected.to eq [item1] }
+          end
+
+          context "when filtering the items by a directly given association" do
+            let(:filter){ {association: item2.association} }
+            it{ is_expected.to eq [item2] }
+          end
+
+          context "when filtering the items by an invalid filter" do
+            let(:filter){ {association: :symbol} }
+            it{ is_expected.to eq [] }
+          end
         end
 
-        context "when filtering the items by a directly given association" do
-          let(:filter){ {association: item2.association} }
-          it{ is_expected.to eq [item2] }
-        end
+        context "when filtering by a set property of the set items" do
+          context "when filtering the items by its subset having items" do
+            let(:filter){ {set: true} }
+            it{ is_expected.to eq [item1] }
+          end
 
-        context "when filtering the items by an invalid filter" do
-          let(:filter){ {association: :symbol} }
-          it{ is_expected.to eq [] }
-        end
-      end
+          context "when filtering the items by its subset having no items" do
+            let(:filter){ {set: false} }
+            it{ is_expected.to eq [item2] }
+          end
 
-      context "when filtering by a set property of the set items" do
-        context "when filtering the items by its subset having items" do
-          let(:filter){ {set: true} }
-          it{ is_expected.to eq [item1] }
-        end
+          context "when filtering the items by the properties of their associations" do
+            let(:filter){ {set: {content: 'setitem1'}} }
+            it{ is_expected.to eq [item1] }
+          end
 
-        context "when filtering the items by its subset having no items" do
-          let(:filter){ {set: false} }
-          it{ is_expected.to eq [item2] }
-        end
+          context "when filtering the items by a directly given association" do
+            let(:filter){ {set: item1.set.first} }
+            it{ is_expected.to eq [item1] }
+          end
 
-        context "when filtering the items by the properties of their associations" do
-          let(:filter){ {set: {content: 'setitem1'}} }
-          it{ is_expected.to eq [item1] }
-        end
-
-        context "when filtering the items by a directly given association" do
-          let(:filter){ {set: item1.set.first} }
-          it{ is_expected.to eq [item1] }
-        end
-
-        context "when filtering the items by an invalid filter" do
-          let(:filter){ {set: :symbol} }
-          it{ is_expected.to eq [] }
+          context "when filtering the items by an invalid filter" do
+            let(:filter){ {set: :symbol} }
+            it{ is_expected.to eq [] }
+          end
         end
       end
     end

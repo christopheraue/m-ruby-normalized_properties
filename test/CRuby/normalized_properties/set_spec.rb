@@ -224,16 +224,14 @@ describe NormalizedProperties::Set do
   describe "#where" do
     subject{ set.where filter }
 
-    context "when the filter is no hash or filter" do
-      let(:filter){ :no_hash }
-      it{ is_expected.to raise_error ArgumentError, 'filter no hash or NormalizedProperties::Filter' }
+    context "when the filter is an empty hash" do
+      let(:filter){ {} }
+      it{ is_expected.to be(set) }
     end
 
-    context "when the filter is a hash" do
-      context "when the filter is empty" do
-        let(:filter){ {} }
-        it{ is_expected.to be(set) }
-      end
+    context "when the filter is nil" do
+      let(:filter){ nil }
+      it{ is_expected.to be(set) }
     end
   end
 end
