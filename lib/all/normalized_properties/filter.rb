@@ -60,6 +60,7 @@ module NormalizedProperties
           part.resolve_dependencies
         else
           resolved_part = {}
+
           part.each do |prop_name, prop_filter|
             resolved_part.merge! item_model.property_config(prop_name).resolve_filter prop_filter
           end

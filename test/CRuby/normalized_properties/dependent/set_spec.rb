@@ -5,6 +5,9 @@ describe NormalizedProperties::Dependent::Set do
 
       attr_accessor :set
       normalized_set :set, type: 'Manual', item_model: 'Item'
+
+      attr_accessor :no_model_set
+      normalized_set :no_model_set, type: 'Manual'
     end)
   end
 
@@ -78,6 +81,178 @@ describe NormalizedProperties::Dependent::Set do
         @item.hash
       end
     end)
+  end
+
+  describe "a set with simple values as items" do
+    subject(:dependent_set){ owner.property :dependent_set }
+
+    shared_examples "for a set property" do
+      before{ set_owner.no_model_set = %w(item1 item2 item3) }
+
+      it{ is_expected.to have_attributes(owner: owner) }
+      it{ is_expected.to have_attributes(name: :dependent_set) }
+      it{ is_expected.to have_attributes(to_s: "#{owner}#dependent_set") }
+
+      describe "#filter" do
+        subject{ dependent_set.filter }
+        let(:dependent_set){ owner.property(:dependent_set).where 'item1' }
+        it{ is_expected.to have_attributes(op: :and, parts: ['item1']) }
+      end
+
+      describe "#dependencies_resolved_filter" do
+        subject{ dependent_set.dependencies_resolved_filter }
+        let(:dependent_set){ owner.property(:dependent_set).where 'item1' }
+        it{ is_expected.to have_attributes(op: :and, parts: ['item1']) }
+      end
+
+      describe "#value" do
+        subject{ dependent_set.value }
+
+        context "when the set has not been filtered" do
+          it{ is_expected.to eq %w(item1 item2 item3) }
+        end
+
+        context "when the set has been filtered" do
+          let(:dependent_set){ owner.property(:dependent_set).where filter }
+
+          context "when the filter is nil" do
+            let(:filter){ nil }
+            it{ is_expected.to eq %w(item1 item2 item3) }
+          end
+
+          context "when no item matches the filter" do
+            let(:filter){ 'no_item' }
+            it{ is_expected.to eq [] }
+          end
+
+          context "when one item matches the filter" do
+            let(:filter){ 'item2' }
+            it{ is_expected.to eq %w(item2) }
+          end
+
+          context "when multiple items match the filter" do
+            let(:filter){ NP.or 'item1', 'item2' }
+            it{ is_expected.to eq %w(item1 item2) }
+          end
+        end
+      end
+
+      describe "#satisfies?" do
+        subject{ dependent_set.satisfies? filter }
+
+        context "when the filter is a hash with property sub filters" do
+          context "when the set does not satisfy the filter" do
+            let(:filter){ 'no_item' }
+            it{ is_expected.to be false }
+          end
+
+          context "when the set satisfies the filter" do
+            let(:filter){ 'item2' }
+            it{ is_expected.to be true }
+          end
+        end
+      end
+
+      describe "watching the addition of an item" do
+        subject do
+          set_owner.no_model_set.push 'item4'
+          set_owner.property(:no_model_set).added! 'item4'
+        end
+
+        before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
+        before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
+        let(:addition_callback){ proc{} }
+        let(:change_callback){ proc{} }
+
+        before{ expect(addition_callback).to receive(:call).with('item4') }
+        before{ expect(change_callback).to receive(:call) }
+        it{ is_expected.not_to raise_error }
+        after{ expect(dependent_set.value).to eq %w(item1 item2 item3 item4)}
+      end
+
+      describe "watching the removal of an item" do
+        subject do
+          set_owner.no_model_set.delete 'item2'
+          set_owner.property(:no_model_set).removed! 'item2'
+        end
+
+        before{ dependent_set.on(:removed){ |*args| removal_callback.call *args } }
+        before{ dependent_set.on(:changed){ |*args| change_callback.call *args } }
+        let(:removal_callback){ proc{} }
+        let(:change_callback){ proc{} }
+
+        before{ expect(removal_callback).to receive(:call).with('item2') }
+        before{ expect(change_callback).to receive(:call) }
+        it{ is_expected.not_to raise_error }
+        after{ expect(dependent_set.value).to eq %w(item1 item3)}
+      end
+    end
+
+    context "when the set has a symbol source" do
+      before do
+        class SetOwner
+          normalized_set :dependent_set, type: 'Dependent',
+            sources: :no_model_set,
+            sources_filter: ->(filter){ {no_model_set: filter} },
+            value: ->(sources){ sources[:no_model_set].value }
+        end
+      end
+
+      let(:set_owner){ owner }
+      include_examples "for a set property"
+    end
+
+    context "when the set has an array source" do
+      before do
+        class SetOwner
+          normalized_set :dependent_set, type: 'Dependent',
+            sources: [:no_model_set],
+            sources_filter: ->(filter){ {no_model_set: filter} },
+            value: ->(sources){ sources[:no_model_set].value }
+        end
+      end
+
+      let(:set_owner){ owner }
+      include_examples "for a set property"
+    end
+
+    context "when the set has a hash source" do
+      before do
+        class SetOwner
+          def child
+            @child ||= self.class.new
+          end
+          normalized_attribute :child, type: 'Manual'
+
+          normalized_set :dependent_set, type: 'Dependent',
+            sources: {child: :no_model_set},
+            sources_filter: ->(filter){ {child: {no_model_set: filter}} },
+            value: ->(sources){ sources[:child][:no_model_set].value }
+        end
+      end
+
+      let(:set_owner){ owner.child }
+      include_examples "for a set property"
+    end
+
+    context "when the set has a mixed source" do
+      before do
+        class SetOwner
+          def child
+            @child ||= self.class.new
+          end
+          normalized_attribute :child, type: 'Manual'
+
+          normalized_set :dependent_set, type: 'Dependent',
+            sources: {child: [child: :no_model_set]},
+            sources_filter: ->(filter){ {child: {child: {no_model_set: filter}}} },
+            value: ->(sources){ sources[:child][:child][:no_model_set].value }
+        end
+      end
+
+      let(:set_owner){ owner.child.child }
+      include_examples "for a set property"
+    end
   end
 
   describe "a set with model instances as items" do
