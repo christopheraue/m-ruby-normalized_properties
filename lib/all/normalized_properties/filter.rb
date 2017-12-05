@@ -59,21 +59,32 @@ module NormalizedProperties
         when Filter
           part.dependencies_resolved item_model
         else
-          resolved_part = {}
-
-          part.each do |prop_name, prop_filter|
-            resolved_part.merge! item_model.property_config(prop_name).resolve_filter prop_filter
-          end
-
-          resolved_part.each do |prop_name, prop_filter|
-            if model = item_model.property_config(prop_name).model
-              resolved_part[prop_name] = model.resolve_dependent_filter prop_filter
-            end
-          end
-
-          resolved_part
+          hash_dependencies_resolved item_model, part
         end
       end)
+    end
+
+    def hash_dependencies_resolved(item_model, hash)
+      resolved_part = {}
+
+      hash.each do |prop_name, prop_filter|
+        resolved_part.merge! item_model.property_config(prop_name).resolve_filter prop_filter
+      end
+
+      resolved_part.each do |prop_name, prop_filter|
+        if prop_model = item_model.property_config(prop_name).model
+          resolved_part[prop_name] = case prop_filter
+                                     when Filter
+                                       prop_filter.dependencies_resolved prop_model
+                                     when Hash
+                                       hash_dependencies_resolved prop_model, prop_filter
+                                     else
+                                       prop_filter
+                                     end
+        end
+      end
+
+      resolved_part
     end
   end
 end
