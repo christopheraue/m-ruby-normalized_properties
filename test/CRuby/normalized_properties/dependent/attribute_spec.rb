@@ -21,7 +21,7 @@ describe NormalizedProperties::Dependent::Attribute do
         def child
           @child ||= self.class.new
         end
-        normalized_attribute :child, type: 'Manual'
+        normalized_attribute :child, type: 'Manual', value_model: 'AttributeOwner'
 
         normalized_attribute :symbol_dependent, type: 'Dependent',
           sources: :attribute,
@@ -144,7 +144,7 @@ describe NormalizedProperties::Dependent::Attribute do
       before do
         class AttributeOwner
           attr_accessor :object
-          normalized_attribute :object, type: 'Manual', item_model: 'ManualObject'
+          normalized_attribute :object, type: 'Manual', value_model: 'ManualObject'
 
           normalized_attribute :object_dependent, type: 'Dependent', value_model: 'DependentObject',
             sources: :object,

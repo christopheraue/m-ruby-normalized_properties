@@ -5,17 +5,24 @@ module NormalizedProperties
     end
 
     def satisfies?(filter)
-      case value = self.value
-      when NormalizedProperties::Instance
+      if value_model
         case filter
         when true
-          true
-        when nil
-          false
+          !!value
+        when nil, false
+          !value
         when Filter
-          filter.satisfied_by? self
+          if value
+            filter.satisfied_by? self
+          else
+            false
+          end
         else
-          value.satisfies? filter
+          if value
+            value.satisfies? filter
+          else
+            value == filter
+          end
         end
       else
         case filter

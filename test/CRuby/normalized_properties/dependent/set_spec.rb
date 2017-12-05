@@ -45,7 +45,7 @@ describe NormalizedProperties::Dependent::Set do
         @item = item
       end
       attr_reader :item
-      normalized_attribute :item, type: 'Manual'
+      normalized_attribute :item, type: 'Manual', value_model: 'Item'
 
       normalized_attribute :attribute, type: 'Dependent',
         sources: {item: :attribute},
@@ -222,7 +222,7 @@ describe NormalizedProperties::Dependent::Set do
           def child
             @child ||= self.class.new
           end
-          normalized_attribute :child, type: 'Manual'
+          normalized_attribute :child, type: 'Manual', value_model: 'SetOwner'
 
           normalized_set :dependent_set, type: 'Dependent',
             sources: {child: :no_model_set},
@@ -241,7 +241,7 @@ describe NormalizedProperties::Dependent::Set do
           def child
             @child ||= self.class.new
           end
-          normalized_attribute :child, type: 'Manual'
+          normalized_attribute :child, type: 'Manual', value_model: 'SetOwner'
 
           normalized_set :dependent_set, type: 'Dependent',
             sources: {child: [child: :no_model_set]},
@@ -502,7 +502,7 @@ describe NormalizedProperties::Dependent::Set do
           def child
             @child ||= self.class.new
           end
-          normalized_attribute :child, type: 'Manual'
+          normalized_attribute :child, type: 'Manual', value_model: 'SetOwner'
 
           normalized_set :dependent_set, type: 'Dependent', item_model: 'DependentItem',
             sources: {child: :set},
@@ -521,7 +521,7 @@ describe NormalizedProperties::Dependent::Set do
           def child
             @child ||= self.class.new
           end
-          normalized_attribute :child, type: 'Manual'
+          normalized_attribute :child, type: 'Manual', value_model: 'SetOwner'
 
           normalized_set :dependent_set, type: 'Dependent', item_model: 'DependentItem',
             sources: {child: [child: :set]},

@@ -54,13 +54,14 @@ describe NormalizedProperties::Attribute do
     end
 
     context "when the attribute value is an object having normalized properties" do
+      let(:attribute){ owner.property :association }
       let(:association) do
         PropertyOwner.new.tap do |association|
           association.attribute = 'attribute_value'
           association.attribute2 = 'attribute2_value'
         end
       end
-      before{ owner.attribute = association }
+      before{ owner.association = association }
 
       context "when the filter is an arbitrary value" do
         let(:filter){ 'arbitrary' }
@@ -98,7 +99,7 @@ describe NormalizedProperties::Attribute do
           it{ is_expected.to be true }
 
           context "when no object is associated" do
-            before{ owner.attribute = nil }
+            before{ owner.association = nil }
             it{ is_expected.to be false }
           end
         end
