@@ -14,33 +14,26 @@ module NormalizedProperties
       @parts.dup.freeze
     end
 
-    def satisfied_by?(object)
-      case object
-      when Instance
-        @parts.__send__(@filter_method) do |filter|
-          case filter
-          when Filter
-            filter.satisfied_by? object
-          else
-            filter.all? do |prop_name, prop_filter|
-              object.property(prop_name).satisfies? prop_filter
-            end
+    def satisfied_by_instance?(instance)
+      @parts.__send__(@filter_method) do |part|
+        case part
+        when Filter
+          part.satisfied_by_instance? instance
+        else
+          part.all? do |prop_name, prop_filter|
+            instance.property(prop_name).satisfies? prop_filter
           end
         end
-      when Set
-        items = object.value
-        items.any?{ |item| @parts.__send__(@filter_method){ |filter| item.satisfies? filter } }
-      when Attribute
-        value = object.value
-        @parts.__send__(@filter_method){ |filter| value.satisfies? filter }
-      else
-        @parts.__send__(@filter_method) do |filter|
-          case filter
-          when Filter
-            filter.satisfied_by? object
-          else
-            object == filter
-          end
+      end
+    end
+
+    def satisfied_by_value?(value)
+      @parts.__send__(@filter_method) do |part|
+        case part
+        when Filter
+          part.satisfied_by_value? value
+        else # simple value
+          value == part
         end
       end
     end

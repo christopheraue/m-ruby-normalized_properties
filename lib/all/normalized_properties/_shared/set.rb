@@ -20,20 +20,31 @@ module NormalizedProperties
     end
 
     def satisfies?(filter)
-      case filter
-      when true
-        not value.empty?
-      when false
-        value.empty?
-      when Filter
-        if item_model
-          filter.satisfied_by? self
+      if item_model
+        case filter
+        when true
+          not value.empty?
+        when false
+          value.empty?
+        when Filter
+          value.any?{ |item| filter.satisfied_by_instance? item }
+        when Hash
+          filter = Filter.new(:and, filter)
+          value.any?{ |item| filter.satisfied_by_instance? item }
+        when Instance
+          filter = Filter.new(:and, filter.to_filter)
+          value.any?{ |item| filter.satisfied_by_instance? item }
         else
-          value.any?{ |item| filter.satisfied_by? item }
+          false
         end
       else
-        if item_model
-          value.any?{ |item| item.satisfies? filter }
+        case filter
+        when true
+          not value.empty?
+        when false
+          value.empty?
+        when Filter
+          value.any?{ |item| filter.satisfied_by_value? item }
         else
           value.any?{ |item| item == filter }
         end

@@ -6,9 +6,9 @@ module NormalizedProperties
       def value
         @owner.__send__(@config.name).select do |item|
           if item_model
-            item.satisfies? @filter
+            @filter.satisfied_by_instance? item
           else
-            @filter.satisfied_by? item
+            @filter.satisfied_by_value? item
           end
         end
       end

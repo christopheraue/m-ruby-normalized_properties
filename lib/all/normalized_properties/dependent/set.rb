@@ -8,17 +8,24 @@ module NormalizedProperties
       def value
         @owner.instance_exec(@config.sources(@owner), &@config.value).select do |item|
           if item_model
-            item.satisfies? @filter
+            @filter.satisfied_by_instance? item
           else
-            @filter.satisfied_by? item
+            @filter.satisfied_by_value? item
           end
         end
       end
 
       def satisfies?(filter)
-        filter = Filter.new :and, filter if filter.is_a? Hash or filter.is_a? Instance
+        filter = case filter
+                 when Hash
+                   Filter.new(:and, filter)
+                 when Instance
+                   Filter.new(:and, filter.to_filter)
+                 else
+                   filter
+                 end
         filter = filter.and @config.value_filter.call(value) if @config.value_filter
-        owner.satisfies? Filter.new :and, @config.sources_filter.call(filter)
+        Filter.new(:and, @config.sources_filter.call(filter)).satisfied_by_instance? owner
       end
     end
   end

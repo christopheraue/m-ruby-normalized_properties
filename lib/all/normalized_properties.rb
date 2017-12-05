@@ -36,18 +36,6 @@ module NormalizedProperties
       @properties[name] ||= self.class.property_config(name).to_property_for self
     end
 
-    def satisfies?(filter)
-      filter = filter.to_filter if filter.is_a? Instance
-      filter = Filter.new(:and, filter) if filter.is_a? Hash
-
-      case filter
-      when Filter
-        filter.satisfied_by? self
-      else
-        false
-      end
-    end
-
     alias __model_id__ __id__
     def self.included(klass)
       klass.normalized_attribute :__model_id__, type: 'Manual'
