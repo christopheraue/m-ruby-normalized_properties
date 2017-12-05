@@ -41,7 +41,8 @@ module NormalizedProperties
     end
 
     def where(filter)
-      if filter == {} or filter == nil
+      case filter
+      when {}, nil
         self
       else
         self.class.new @owner, @config, @filter.and(filter)
