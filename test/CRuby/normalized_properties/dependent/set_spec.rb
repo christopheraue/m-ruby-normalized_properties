@@ -95,14 +95,14 @@ describe NormalizedProperties::Dependent::Set do
 
       describe "#filter" do
         subject{ dependent_set.filter }
-        let(:dependent_set){ owner.property(:dependent_set).where 'item1' }
-        it{ is_expected.to have_attributes(op: :and, parts: ['item1']) }
+        let(:dependent_set){ owner.property(:dependent_set).where NP.or('item1', 'item2') }
+        it{ is_expected.to have_attributes(op: :and, parts: [have_attributes(op: :or, parts: %w(item1 item2))]) }
       end
 
       describe "#dependencies_resolved_filter" do
         subject{ dependent_set.dependencies_resolved_filter }
-        let(:dependent_set){ owner.property(:dependent_set).where 'item1' }
-        it{ is_expected.to have_attributes(op: :and, parts: ['item1']) }
+        let(:dependent_set){ owner.property(:dependent_set).where NP.or('item1', 'item2') }
+        it{ is_expected.to have_attributes(op: :and, parts: [have_attributes(op: :or, parts: %w(item1 item2))]) }
       end
 
       describe "#value" do
@@ -297,14 +297,18 @@ describe NormalizedProperties::Dependent::Set do
 
       describe "#filter" do
         subject{ dependent_set.filter }
-        let(:dependent_set){ owner.property(:dependent_set).where association: true }
-        it{ is_expected.to have_attributes(op: :and, parts: [association: true]) }
+        let(:dependent_set){ owner.property(:dependent_set).where\
+          NP.and({attribute: 'attribute1'}, {association: true}) }
+        it{ is_expected.to have_attributes(op: :and, parts:
+          [have_attributes(op: :and, parts: [{attribute: 'attribute1'}, {association: true}])]) }
       end
 
       describe "#dependencies_resolved_filter" do
         subject{ dependent_set.dependencies_resolved_filter }
-        let(:dependent_set){ owner.property(:dependent_set).where association: true }
-        it{ is_expected.to have_attributes(op: :and, parts: [item: {association: true}]) }
+        let(:dependent_set){ owner.property(:dependent_set).where\
+          NP.and({attribute: 'attribute1'}, {association: true}) }
+        it{ is_expected.to have_attributes(op: :and, parts:
+          [have_attributes(op: :and, parts: [{item: {attribute: 'attribute1'}}, {item: {association: true}}])]) }
       end
 
       describe "#value" do

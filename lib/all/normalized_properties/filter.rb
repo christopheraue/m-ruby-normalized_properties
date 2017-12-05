@@ -57,7 +57,7 @@ module NormalizedProperties
       Filter.new @op, *(@parts.map do |part|
         case part
         when Filter
-          part.resolve_dependencies
+          part.dependencies_resolved item_model
         else
           resolved_part = {}
 
