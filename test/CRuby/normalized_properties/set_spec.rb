@@ -159,12 +159,12 @@ describe NormalizedProperties::Set do
 
       context "when filtering by a hash of item attributes" do
         context "when the set contains the item" do
-          let(:filter){ {__model_id__: item1.__model_id__} }
+          let(:filter){ {value: item1.value} }
           it{ is_expected.to be true }
         end
 
         context "when the set does not contain the item" do
-          let(:filter){ {__model_id__: item3.__model_id__} }
+          let(:filter){ {value: item3.value} }
           it{ is_expected.to be false }
         end
       end
@@ -174,13 +174,13 @@ describe NormalizedProperties::Set do
           let(:filter){ NP.and filter1, filter2 }
 
           context "when the property satisfies the filter" do
-            let(:filter1){ {__model_id__: item1.__model_id__} }
+            let(:filter1){ {value: item1.value} }
             let(:filter2){ {value: item1.value} }
             it{ is_expected.to be true }
           end
 
           context "when the property does not satisfy the filter" do
-            let(:filter1){ {__model_id__: item1.__model_id__} }
+            let(:filter1){ {value: item1.value} }
             let(:filter2){ {value: item2.value} }
             it{ is_expected.to be false }
           end
@@ -190,13 +190,13 @@ describe NormalizedProperties::Set do
           let(:filter){ NP.or filter1, filter2 }
 
           context "when the property satisfies the filter" do
-            let(:filter1){ {__model_id__: item1.__model_id__} }
+            let(:filter1){ {value: item1.value} }
             let(:filter2){ {value: item3.value} }
             it{ is_expected.to be true }
           end
 
           context "when the property does not satisfy the filter" do
-            let(:filter1){ {__model_id__: item3.__model_id__} }
+            let(:filter1){ {value: item3.value} }
             let(:filter2){ {value: item4.value} }
             it{ is_expected.to be false }
           end
@@ -206,13 +206,13 @@ describe NormalizedProperties::Set do
           let(:filter){ NP.not filter1, filter2 }
 
           context "when the property satisfies the filter" do
-            let(:filter1){ {__model_id__: item3.__model_id__} }
+            let(:filter1){ {value: item3.value} }
             let(:filter2){ {value: item4.value} }
             it{ is_expected.to be true }
           end
 
           context "when the property does not satisfy the filter" do
-            let(:filter1){ {__model_id__: item1.__model_id__} }
+            let(:filter1){ {value: item1.value} }
             let(:filter2){ {value: item2.value} }
             it{ is_expected.to be false }
           end

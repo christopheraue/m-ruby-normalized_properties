@@ -123,9 +123,7 @@ describe NormalizedProperties::Dependent::Attribute do
         attr_reader :object
         normalized_attribute :object, type: 'Manual'
 
-        def to_filter
-          {__model_id__: object.property(:__model_id__).value}
-        end
+        alias to_filter object
 
         def ==(other)
           @object == other&.object
@@ -223,7 +221,7 @@ describe NormalizedProperties::Dependent::Attribute do
             sources: :set,
             sources_filter: ->(filter){ {set: filter} },
             value: ->(sources){ DependentObject.new sources[:set].value.find{ |item| item.value == 'item2' } },
-            value_filter: ->(value){ {__model_id__: value.object.__model_id__} }
+            value_filter: ->(value){ value.object }
         end
       end
 

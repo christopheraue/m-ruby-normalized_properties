@@ -68,9 +68,7 @@ describe NormalizedProperties::Dependent::Set do
         sources_filter: ->(filter){ {item: {set: filter}} },
         value: ->(sources){ sources[:item][:set].value }
 
-      def to_filter
-        {__model_id__: item.property(:__model_id__).value}
-      end
+      alias to_filter item
 
       def ==(other)
         @item == other.item
@@ -543,7 +541,7 @@ describe NormalizedProperties::Dependent::Set do
             sources: :set,
             sources_filter: ->(filter){ {set: filter} },
             value: ->(sources){ sources[:set].value.select{ |item| item.attribute == 'odd' }.map{ |item| DependentItem.new item } },
-            value_filter: ->(value){ {__model_id__: (NP.or *value.map(&:item).map(&:__model_id__))} }
+            value_filter: ->(value){ NP.or *value.map(&:item) }
         end
       end
 

@@ -36,13 +36,8 @@ module NormalizedProperties
       @properties[name] ||= self.class.property_config(name).to_property_for self
     end
 
-    alias __model_id__ __id__
-    def self.included(klass)
-      klass.normalized_attribute :__model_id__, type: 'Manual'
-    end
-
     def to_filter
-      {__model_id__: property(:__model_id__).value}
+      itself
     end
 
     def satisfies?(filter)
