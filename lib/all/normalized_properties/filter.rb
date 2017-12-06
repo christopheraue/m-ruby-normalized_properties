@@ -51,8 +51,10 @@ module NormalizedProperties
         case part
         when Filter
           part.dependencies_resolved item_model
-        else
+        when Hash
           hash_dependencies_resolved item_model, part
+        else
+          part
         end
       end)
     end
