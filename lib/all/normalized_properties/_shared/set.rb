@@ -1,8 +1,15 @@
 module NormalizedProperties
   class Set < Property
-    def initialize(owner, config, filter = nil)
+    def initialize(owner, config, filter = {})
       super owner, config
-      @filter = (filter or Filter.new :and)
+      @filter = case filter
+                when Filter
+                  filter
+                when {}
+                  Filter.new :and
+                else
+                  Filter.new :and, filter
+                end
     end
 
     attr_reader :filter
