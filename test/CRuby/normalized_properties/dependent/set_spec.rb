@@ -85,7 +85,7 @@ describe NormalizedProperties::Dependent::Set do
     subject(:dependent_set){ owner.property :dependent_set }
 
     shared_examples "for a set property" do
-      before{ set_owner.no_model_set = %w(item1 item2 item3) }
+      before{ set_owner.no_model_set = %w(item1 item2) }
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :dependent_set) }
@@ -93,21 +93,25 @@ describe NormalizedProperties::Dependent::Set do
 
       describe "#filter" do
         subject{ dependent_set.filter }
-        let(:dependent_set){ owner.property(:dependent_set).where NP.or('item1', 'item2') }
-        it{ is_expected.to have_attributes(op: :and, parts: [have_attributes(op: :or, parts: %w(item1 item2))]) }
+        let(:dependent_set){ owner.property(:dependent_set).where\
+          NP.or('item1', 'item2') }
+        it{ is_expected.to have_attributes(op: :and, parts:
+          [have_attributes(op: :or, parts: %w(item1 item2))]) }
       end
 
       describe "#dependencies_resolved_filter" do
         subject{ dependent_set.dependencies_resolved_filter }
-        let(:dependent_set){ owner.property(:dependent_set).where NP.or('item1', 'item2') }
-        it{ is_expected.to have_attributes(op: :and, parts: [have_attributes(op: :or, parts: %w(item1 item2))]) }
+        let(:dependent_set){ owner.property(:dependent_set).where\
+          NP.or('item1', 'item2') }
+        it{ is_expected.to have_attributes(op: :and, parts:
+          [have_attributes(op: :or, parts: %w(item1 item2))]) }
       end
 
       describe "#value" do
         subject{ dependent_set.value }
 
         context "when the set has not been filtered" do
-          it{ is_expected.to eq %w(item1 item2 item3) }
+          it{ is_expected.to eq %w(item1 item2) }
         end
 
         context "when the set has been filtered" do
@@ -115,7 +119,7 @@ describe NormalizedProperties::Dependent::Set do
 
           context "when the filter is nil" do
             let(:filter){ nil }
-            it{ is_expected.to eq %w(item1 item2 item3) }
+            it{ is_expected.to eq %w(item1 item2) }
           end
 
           context "when no item matches the filter" do
@@ -153,8 +157,8 @@ describe NormalizedProperties::Dependent::Set do
 
       describe "watching the addition of an item" do
         subject do
-          set_owner.no_model_set.push 'item4'
-          set_owner.property(:no_model_set).added! 'item4'
+          set_owner.no_model_set.push 'item3'
+          set_owner.property(:no_model_set).added! 'item3'
         end
 
         before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
@@ -162,10 +166,10 @@ describe NormalizedProperties::Dependent::Set do
         let(:addition_callback){ proc{} }
         let(:change_callback){ proc{} }
 
-        before{ expect(addition_callback).to receive(:call).with('item4') }
+        before{ expect(addition_callback).to receive(:call).with('item3') }
         before{ expect(change_callback).to receive(:call) }
         it{ is_expected.not_to raise_error }
-        after{ expect(dependent_set.value).to eq %w(item1 item2 item3 item4)}
+        after{ expect(dependent_set.value).to eq %w(item1 item2 item3) }
       end
 
       describe "watching the removal of an item" do
@@ -182,7 +186,7 @@ describe NormalizedProperties::Dependent::Set do
         before{ expect(removal_callback).to receive(:call).with('item2') }
         before{ expect(change_callback).to receive(:call) }
         it{ is_expected.not_to raise_error }
-        after{ expect(dependent_set.value).to eq %w(item1 item3)}
+        after{ expect(dependent_set.value).to eq %w(item1) }
       end
     end
 
@@ -197,6 +201,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner }
+
       include_examples "for a set property"
     end
 
@@ -211,6 +216,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner }
+
       include_examples "for a set property"
     end
 
@@ -230,6 +236,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner.child }
+
       include_examples "for a set property"
     end
 
@@ -249,6 +256,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner.child.child }
+
       include_examples "for a set property"
     end
   end
@@ -256,38 +264,29 @@ describe NormalizedProperties::Dependent::Set do
   describe "a set with model instances as items" do
     subject(:dependent_set){ owner.property :dependent_set }
 
+    let(:item1) do
+      Item.new.tap do |item|
+        item.attribute = 'attribute1'
+        item.association = ItemProperty.new('association1')
+        item.set = [ItemProperty.new('setitem1')]
+      end
+    end
+    let(:dependent_item1){ DependentItem.new item1 }
+
+    let(:item2) do
+      Item.new.tap do |item|
+        item.attribute = 'attribute2'
+        item.association = nil
+        item.set = []
+      end
+    end
+    let(:dependent_item2){ DependentItem.new item2 }
+
+    let(:item3){ Item.new }
+    let(:dependent_item3){ DependentItem.new item3 }
+
     shared_examples "for a set property" do
-      let(:item1) do
-        Item.new.tap do |item|
-          item.attribute = 'attribute1'
-          item.association = ItemProperty.new('association1')
-          item.set = [ItemProperty.new('setitem1')]
-        end
-      end
-      let(:dependent_item1){ DependentItem.new item1 }
-
-      let(:item2) do
-        Item.new.tap do |item|
-          item.attribute = 'attribute2'
-          item.association = nil
-          item.set = [ItemProperty.new('setitem2')]
-        end
-      end
-      let(:dependent_item2){ DependentItem.new item2 }
-
-      let(:item3) do
-        Item.new.tap do |item|
-          item.attribute = 'attribute1'
-          item.association = ItemProperty.new('association3')
-          item.set = []
-        end
-      end
-      let(:dependent_item3){ DependentItem.new item3 }
-
-      let(:item4){ Item.new }
-      let(:dependent_item4){ DependentItem.new item4 }
-
-      before{ set_owner.set = [item1, item2, item3] }
+      before{ set_owner.set = [item1, item2] }
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :dependent_set) }
@@ -313,7 +312,7 @@ describe NormalizedProperties::Dependent::Set do
         subject{ dependent_set.value }
 
         context "when the set has not been filtered" do
-          it{ is_expected.to eq [dependent_item1, dependent_item2, dependent_item3] }
+          it{ is_expected.to eq [dependent_item1, dependent_item2] }
         end
 
         context "when the set has been filtered" do
@@ -321,7 +320,7 @@ describe NormalizedProperties::Dependent::Set do
 
           context "when the filter is empty" do
             let(:filter){ {} }
-            it{ is_expected.to eq [dependent_item1, dependent_item2, dependent_item3] }
+            it{ is_expected.to eq [dependent_item1, dependent_item2] }
           end
 
           context "when filtering by an unknown property" do
@@ -342,14 +341,14 @@ describe NormalizedProperties::Dependent::Set do
 
             context "when multiple items match the filter" do
               let(:filter){ {attribute: 'attribute1'} }
-              it{ is_expected.to eq [dependent_item1, dependent_item3] }
+              it{ is_expected.to eq [dependent_item1] }
             end
           end
 
           context "when filtering by an association property of the set items" do
             context "when filtering the items merely by having an association" do
               let(:filter){ {association: true} }
-              it{ is_expected.to eq [dependent_item1, dependent_item3] }
+              it{ is_expected.to eq [dependent_item1] }
             end
 
             context "when filtering the items by having no association" do
@@ -363,8 +362,8 @@ describe NormalizedProperties::Dependent::Set do
             end
 
             context "when filtering the items by a directly given association" do
-              let(:filter){ {association: dependent_item3.association} }
-              it{ is_expected.to eq [dependent_item3] }
+              let(:filter){ {association: dependent_item2.association} }
+              it{ is_expected.to eq [dependent_item2] }
             end
 
             context "when filtering the items by an invalid filter" do
@@ -376,12 +375,12 @@ describe NormalizedProperties::Dependent::Set do
           context "when filtering by a set property of the set items" do
             context "when filtering the items by its subset having items" do
               let(:filter){ {set: true} }
-              it{ is_expected.to eq [dependent_item1, dependent_item2] }
+              it{ is_expected.to eq [dependent_item1] }
             end
 
             context "when filtering the items by its subset having no items" do
               let(:filter){ {set: false} }
-              it{ is_expected.to eq [dependent_item3] }
+              it{ is_expected.to eq [dependent_item2] }
             end
 
             context "when filtering the items by the properties of their associations" do
@@ -390,8 +389,8 @@ describe NormalizedProperties::Dependent::Set do
             end
 
             context "when filtering the items by a directly given association" do
-              let(:filter){ {set: dependent_item2.set.first} }
-              it{ is_expected.to eq [dependent_item2] }
+              let(:filter){ {set: dependent_item1.set.first} }
+              it{ is_expected.to eq [dependent_item1] }
             end
 
             context "when filtering the items by an invalid filter" do
@@ -419,7 +418,7 @@ describe NormalizedProperties::Dependent::Set do
 
         context "when the filter is an item directly" do
           context "when the set does not satisfy the filter" do
-            let(:filter){ dependent_item4 }
+            let(:filter){ dependent_item3 }
             it{ is_expected.to be false }
           end
 
@@ -432,8 +431,8 @@ describe NormalizedProperties::Dependent::Set do
 
       describe "watching the addition of an item" do
         subject do
-          set_owner.set.push item4
-          set_owner.property(:set).added! item4
+          set_owner.set.push item3
+          set_owner.property(:set).added! item3
         end
 
         before{ dependent_set.on(:added){ |*args| addition_callback.call *args } }
@@ -441,11 +440,10 @@ describe NormalizedProperties::Dependent::Set do
         let(:addition_callback){ proc{} }
         let(:change_callback){ proc{} }
 
-        before{ expect(addition_callback).to receive(:call).with(dependent_item4) }
+        before{ expect(addition_callback).to receive(:call).with(dependent_item3) }
         before{ expect(change_callback).to receive(:call) }
         it{ is_expected.not_to raise_error }
-        after{ expect(dependent_set.value).to eq [dependent_item1, dependent_item2, dependent_item3,
-          dependent_item4] }
+        after{ expect(dependent_set.value).to eq [dependent_item1, dependent_item2, dependent_item3] }
       end
 
       describe "watching the removal of an item" do
@@ -462,7 +460,7 @@ describe NormalizedProperties::Dependent::Set do
         before{ expect(removal_callback).to receive(:call).with(dependent_item2) }
         before{ expect(change_callback).to receive(:call) }
         it{ is_expected.not_to raise_error }
-        after{ expect(dependent_set.value).to eq [dependent_item1, dependent_item3] }
+        after{ expect(dependent_set.value).to eq [dependent_item1] }
       end
     end
 
@@ -477,6 +475,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner }
+
       include_examples "for a set property"
     end
 
@@ -491,6 +490,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner }
+
       include_examples "for a set property"
     end
 
@@ -510,6 +510,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner.child }
+
       include_examples "for a set property"
     end
 
@@ -529,6 +530,7 @@ describe NormalizedProperties::Dependent::Set do
       end
 
       let(:set_owner){ owner.child.child }
+
       include_examples "for a set property"
     end
 
