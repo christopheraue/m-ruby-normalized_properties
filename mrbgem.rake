@@ -17,6 +17,8 @@ MRuby::Gem::Specification.new('mruby-normalized_properties') do |spec|
   end
 
   spec.rbfiles      =
+    Dir["#{spec.dir}/ext/all/**/*.rb"].sort +
+    Dir["#{spec.dir}/ext/mruby/**/*.rb"].sort +
     Dir["#{spec.dir}/lib/all/**/*.rb"].sort +
     Dir["#{spec.dir}/lib/mruby/**/*.rb"].sort
   spec.test_rbfiles = Dir["#{spec.dir}/test/mruby/*.rb"]

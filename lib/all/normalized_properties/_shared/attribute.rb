@@ -5,28 +5,15 @@ module NormalizedProperties
     end
 
     def satisfies?(filter)
-      if value_model and value
-        case filter
-        when true
+      case filter
+      when true
+        if value_model
           !!value
-        when Filter
-          filter.satisfied_by_model_instance? value
-        when Hash
-          filter = Filter.new(:and, filter)
-          filter.satisfied_by_model_instance? value
-        when Instance
-          filter = Filter.new(:and, filter.to_filter)
-          filter.satisfied_by_model_instance? value
         else
-          false
+          value.satisfies? filter
         end
       else
-        case filter
-        when Filter
-          filter.satisfied_by_object? value
-        else
-          value == filter
-        end
+        value.satisfies? filter
       end
     end
 

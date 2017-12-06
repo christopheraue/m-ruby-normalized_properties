@@ -44,6 +44,19 @@ module NormalizedProperties
     def to_filter
       {__model_id__: property(:__model_id__).value}
     end
+
+    def satisfies?(filter)
+      case filter
+      when Filter
+        filter.satisfied_by? self
+      when Hash
+        filter.all? do |prop_name, prop_filter|
+          property(prop_name).satisfies? prop_filter
+        end
+      else # Instance
+        self == filter
+      end
+    end
   end
 
   def self.extended(klass)

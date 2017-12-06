@@ -18,8 +18,10 @@ module NormalizedProperties
                  else
                    filter
                  end
+
         filter = filter.and @config.value_filter.call(value) if @config.value_filter
-        Filter.new(:and, @config.sources_filter.call(filter)).satisfied_by_model_instance? owner
+        filter = Filter.new :and, @config.sources_filter.call(filter)
+        owner.satisfies? filter
       end
     end
   end

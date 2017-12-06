@@ -5,11 +5,7 @@ module NormalizedProperties
 
       def value
         @owner.__send__(@config.name).select do |item|
-          if item_model
-            @filter.satisfied_by_model_instance? item
-          else
-            @filter.satisfied_by_object? item
-          end
+          item.satisfies? @filter
         end
       end
     end
