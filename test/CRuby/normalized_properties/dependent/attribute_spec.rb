@@ -3,58 +3,33 @@ describe NormalizedProperties::Dependent::Attribute do
     stub_const('AttributeOwner', Class.new{ extend NormalizedProperties })
   end
 
-  let(:owner){ AttributeOwner.new }
-
   describe "an attribute with a simple value" do
     before do
       class AttributeOwner
-        def attribute
-          @value ||= 'attribute_value'
+        def initialize(attribute)
+          @attribute = attribute
         end
+
+        attr_accessor :attribute
         normalized_attribute :attribute, type: 'Manual'
-
-        def attribute=(new_value)
-          @value = new_value
-          property(:attribute).changed!
-        end
-
-        def child
-          @child ||= self.class.new
-        end
-        normalized_attribute :child, type: 'Manual', value_model: 'AttributeOwner'
-
-        normalized_attribute :symbol_dependent, type: 'Dependent',
-          sources: :attribute,
-          sources_filter: ->(filter){ {attribute: filter.sub("dependent_", "")} },
-          value: ->(sources){ "dependent_#{sources[:attribute].value}" }
-
-        normalized_attribute :array_dependent, type: 'Dependent',
-          sources: [:attribute],
-          sources_filter: ->(filter){ {attribute: filter.sub("dependent_", "")} },
-          value: ->(sources){ "dependent_#{sources[:attribute].value}" }
-
-        normalized_attribute :hash_dependent, type: 'Dependent',
-          sources: {child: :attribute},
-          sources_filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} },
-          value: ->(sources){ "dependent_#{sources[:child][:attribute].value}" }
-
-        normalized_attribute :mixed_dependent, type: 'Dependent',
-          sources: {child: [child: :attribute]},
-          sources_filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} },
-          value: ->(sources){ "dependent_#{sources[:child][:child][:attribute].value}" }
       end
     end
 
-    shared_examples "for an attribute property" do|property_name|
-      subject(:dependent_attribute){ owner.property property_name }
+    let(:owner){ AttributeOwner.new 'attribute_value' }
+
+    shared_examples "for an attribute property" do
+      subject(:dependent_attribute){ owner.property :dependent_attribute }
 
       it{ is_expected.to have_attributes(owner: owner) }
-      it{ is_expected.to have_attributes(name: property_name) }
-      it{ is_expected.to have_attributes(to_s: "#{owner}##{property_name}") }
+      it{ is_expected.to have_attributes(name: :dependent_attribute) }
+      it{ is_expected.to have_attributes(to_s: "#{owner}#dependent_attribute") }
       it{ is_expected.to have_attributes(value: 'dependent_attribute_value') }
 
       describe "watching a change" do
-        subject{ attribute_owner.attribute = 'changed_value' }
+        subject do
+          attribute_owner.attribute = 'changed_value'
+          attribute_owner.property(:attribute).changed!
+        end
 
         before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
         let(:callback){ proc{} }
@@ -80,23 +55,73 @@ describe NormalizedProperties::Dependent::Attribute do
     end
 
     context "when the attribute has a symbol source" do
+      before do
+        class AttributeOwner
+          normalized_attribute :dependent_attribute, type: 'Dependent',
+            sources: :attribute,
+            sources_filter: ->(filter){ {attribute: filter.sub("dependent_", "")} },
+            value: ->(sources){ "dependent_#{sources[:attribute].value}" }
+        end
+      end
+
       let(:attribute_owner){ owner }
-      include_examples "for an attribute property", :symbol_dependent
+
+      include_examples "for an attribute property"
     end
 
     context "when the attribute has an array source" do
+      before do
+        class AttributeOwner
+          normalized_attribute :dependent_attribute, type: 'Dependent',
+            sources: [:attribute],
+            sources_filter: ->(filter){ {attribute: filter.sub("dependent_", "")} },
+            value: ->(sources){ "dependent_#{sources[:attribute].value}" }
+        end
+      end
+
       let(:attribute_owner){ owner }
-      include_examples "for an attribute property", :array_dependent
+
+      include_examples "for an attribute property"
     end
 
     context "when the attribute has a hash source" do
+      before do
+        class AttributeOwner
+          def child
+            @child ||= self.class.new 'attribute_value'
+          end
+          normalized_attribute :child, type: 'Manual', value_model: 'AttributeOwner'
+
+          normalized_attribute :dependent_attribute, type: 'Dependent',
+            sources: {child: :attribute},
+            sources_filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} },
+            value: ->(sources){ "dependent_#{sources[:child][:attribute].value}" }
+        end
+      end
+
       let(:attribute_owner){ owner.child }
-      include_examples "for an attribute property", :hash_dependent
+
+      include_examples "for an attribute property"
     end
 
     context "when the attribute has a mixed source" do
+      include_examples "for an attribute property"
+
+      before do
+        class AttributeOwner
+          def child
+            @child ||= self.class.new 'attribute_value'
+          end
+          normalized_attribute :child, type: 'Manual', value_model: 'AttributeOwner'
+
+          normalized_attribute :dependent_attribute, type: 'Dependent',
+            sources: {child: [child: :attribute]},
+            sources_filter: ->(filter){ {child: {attribute: filter.sub("dependent_", "")}} },
+            value: ->(sources){ "dependent_#{sources[:child][:child][:attribute].value}" }
+        end
+      end
+
       let(:attribute_owner){ owner.child.child }
-      include_examples "for an attribute property", :mixed_dependent
     end
   end
 
@@ -141,6 +166,13 @@ describe NormalizedProperties::Dependent::Attribute do
 
       before do
         class AttributeOwner
+          def initialize(attribute)
+            @attribute = attribute
+          end
+
+          attr_accessor :attribute
+          normalized_attribute :attribute, type: 'Manual'
+
           attr_accessor :object
           normalized_attribute :object, type: 'Manual', value_model: 'ManualObject'
 
@@ -150,6 +182,8 @@ describe NormalizedProperties::Dependent::Attribute do
             value: ->(sources){ DependentObject.new sources[:object].value }
         end
       end
+
+      let(:owner){ AttributeOwner.new 'attribute_value' }
 
       let(:object) { ManualObject.new 'object' }
       before{ owner.object = object }
@@ -179,25 +213,25 @@ describe NormalizedProperties::Dependent::Attribute do
         subject{ dependent_attribute.satisfies? filter }
 
         context "when the filter is a hash with property sub filters" do
-          context "when the set does not satisfy the filter" do
+          context "when the object does not satisfy the filter" do
             let(:filter){ {value: "another_object"} }
             it{ is_expected.to be false }
           end
 
-          context "when the set satisfies the filter" do
+          context "when the object satisfies the filter" do
             let(:filter){ {value: 'object'} }
             it{ is_expected.to be true }
           end
         end
 
-        context "when the filter is an item directly" do
-          context "when the set does not satisfy the filter" do
+        context "when the filter is an object directly" do
+          context "when the object does not satisfy the filter" do
             let(:filter){ DependentObject.new another_object }
             let(:another_object) { ManualObject.new 'another_object' }
             it{ is_expected.to be false }
           end
 
-          context "when the set satisfies the filter" do
+          context "when the object satisfies the filter" do
             let(:filter){ DependentObject.new object }
             it{ is_expected.to be true }
           end
@@ -210,8 +244,8 @@ describe NormalizedProperties::Dependent::Attribute do
 
       before do
         class AttributeOwner
-          def initialize
-            @set = []
+          def initialize(set = [])
+            @set = set
           end
 
           attr_accessor :set
@@ -224,9 +258,9 @@ describe NormalizedProperties::Dependent::Attribute do
         end
       end
 
+      let(:owner){ AttributeOwner.new [item1, item2] }
       let(:item1){ ManualObject.new 'item1' }
       let(:item2){ ManualObject.new 'item2' }
-      before{ owner.set = [item1, item2] }
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :set_dependent) }
