@@ -4,7 +4,7 @@ module NormalizedProperties
       EVENTS_TRIGGERED_BY_WATCHER = false
 
       def value
-        @owner.__send__(@config.name).select do |item|
+        @owner.__send__(@name).select do |item|
           item.satisfies? @filter
         end
       end
