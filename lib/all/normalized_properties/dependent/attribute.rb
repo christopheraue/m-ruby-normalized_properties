@@ -10,8 +10,10 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter = filter.to_filter if value_model and filter.is_a? value_model
-        filter = Filter.new :and, filter, @config.value_filter.call(value) if @config.value_filter
+        if value_model
+          filter = filter.to_filter if filter.is_a? value_model
+          filter = Filter.new :and, filter, value.to_filter unless value.nil?
+        end
         filter = Filter.new :and, @config.sources_filter.call(filter)
         owner.satisfies? filter
       end

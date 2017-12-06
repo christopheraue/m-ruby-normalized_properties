@@ -6,10 +6,9 @@ module NormalizedProperties
         @sources = config.fetch :sources
         @value = config.fetch :value
         @sources_filter = config.fetch :sources_filter
-        @value_filter = config[:value_filter]
       end
 
-      attr_reader :value, :sources_filter, :value_filter
+      attr_reader :value, :sources_filter
 
       def sources(owner, sources = @sources)
         result = {}

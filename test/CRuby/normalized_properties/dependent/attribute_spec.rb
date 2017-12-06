@@ -220,8 +220,7 @@ describe NormalizedProperties::Dependent::Attribute do
           normalized_attribute :set_dependent, type: 'Dependent', value_model: 'DependentObject',
             sources: :set,
             sources_filter: ->(filter){ {set: filter} },
-            value: ->(sources){ DependentObject.new sources[:set].value.find{ |item| item.value == 'item2' } },
-            value_filter: ->(value){ value.object }
+            value: ->(sources){ DependentObject.new sources[:set].value.find{ |item| item.value == 'item2' } }
         end
       end
 

@@ -5,16 +5,7 @@ module NormalizedProperties
     end
 
     def satisfies?(filter)
-      case filter
-      when true
-        if value_model
-          !!value
-        else
-          value.satisfies? filter
-        end
-      else
-        value.satisfies? filter
-      end
+      value.satisfies? filter
     end
 
     EVENTS_TRIGGERED_BY_WATCHER = %i(changed)

@@ -12,8 +12,10 @@ module NormalizedProperties
       end
 
       def satisfies?(filter)
-        filter = filter.to_filter if item_model and filter.is_a? item_model
-        filter = Filter.new :and, filter, @config.value_filter.call(value) if @config.value_filter
+        if item_model
+          filter = filter.to_filter if filter.is_a? item_model
+          filter = Filter.new :and, filter, (NP.or *(value.map &:to_filter)) unless value.empty?
+        end
         filter = Filter.new :and, @config.sources_filter.call(filter)
         owner.satisfies? filter
       end

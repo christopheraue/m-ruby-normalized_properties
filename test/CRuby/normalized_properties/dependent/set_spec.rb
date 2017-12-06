@@ -12,7 +12,7 @@ describe NormalizedProperties::Dependent::Set do
   end
 
   let(:owner){ SetOwner.new }
-  
+
   before do
     stub_const('Item', Class.new do
       extend NormalizedProperties
@@ -540,8 +540,7 @@ describe NormalizedProperties::Dependent::Set do
           normalized_set :set_dependent, type: 'Dependent', item_model: 'DependentItem',
             sources: :set,
             sources_filter: ->(filter){ {set: filter} },
-            value: ->(sources){ sources[:set].value.select{ |item| item.attribute == 'odd' }.map{ |item| DependentItem.new item } },
-            value_filter: ->(value){ NP.or *value.map(&:item) }
+            value: ->(sources){ sources[:set].value.select{ |item| item.attribute == 'odd' }.map{ |item| DependentItem.new item } }
         end
       end
 

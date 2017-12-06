@@ -48,6 +48,8 @@ module NormalizedProperties
         filter.all? do |prop_name, prop_filter|
           property(prop_name).satisfies? prop_filter
         end
+      when true
+        true
       else # Instance
         self == filter
       end
