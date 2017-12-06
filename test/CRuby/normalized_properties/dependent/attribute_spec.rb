@@ -90,7 +90,7 @@ describe NormalizedProperties::Dependent::Attribute do
           def child
             @child ||= self.class.new 'attribute_value'
           end
-          normalized_attribute :child, type: 'Manual', value_model: 'AttributeOwner'
+          normalized_attribute :child, type: 'Manual', model: 'AttributeOwner'
 
           normalized_attribute :dependent_attribute, type: 'Dependent',
             sources: {child: :attribute},
@@ -112,7 +112,7 @@ describe NormalizedProperties::Dependent::Attribute do
           def child
             @child ||= self.class.new 'attribute_value'
           end
-          normalized_attribute :child, type: 'Manual', value_model: 'AttributeOwner'
+          normalized_attribute :child, type: 'Manual', model: 'AttributeOwner'
 
           normalized_attribute :dependent_attribute, type: 'Dependent',
             sources: {child: [child: :attribute]},
@@ -174,9 +174,9 @@ describe NormalizedProperties::Dependent::Attribute do
           normalized_attribute :attribute, type: 'Manual'
 
           attr_accessor :object
-          normalized_attribute :object, type: 'Manual', value_model: 'ManualObject'
+          normalized_attribute :object, type: 'Manual', model: 'ManualObject'
 
-          normalized_attribute :object_dependent, type: 'Dependent', value_model: 'DependentObject',
+          normalized_attribute :object_dependent, type: 'Dependent', model: 'DependentObject',
             sources: :object,
             sources_filter: ->(filter){ {object: filter} },
             value: ->(sources){ DependentObject.new sources[:object].value }
@@ -249,9 +249,9 @@ describe NormalizedProperties::Dependent::Attribute do
           end
 
           attr_accessor :set
-          normalized_set :set, type: 'Manual', item_model: 'ManualObject'
+          normalized_set :set, type: 'Manual', model: 'ManualObject'
 
-          normalized_attribute :set_dependent, type: 'Dependent', value_model: 'DependentObject',
+          normalized_attribute :set_dependent, type: 'Dependent', model: 'DependentObject',
             sources: :set,
             sources_filter: ->(filter){ {set: filter} },
             value: ->(sources){ DependentObject.new sources[:set].value.find{ |item| item.value == 'item2' } }

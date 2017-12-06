@@ -4,7 +4,7 @@ describe NormalizedProperties::Set do
       extend NormalizedProperties
 
       attr_accessor :set
-      normalized_set :set, type: 'Manual', item_model: 'Item'
+      normalized_set :set, type: 'Manual', model: 'Item'
 
       attr_accessor :no_model_set
       normalized_set :no_model_set, type: 'Manual'
@@ -33,15 +33,15 @@ describe NormalizedProperties::Set do
 
   before{ owner.no_model_set = %w(item1 item2) }
 
-  describe "#value_model" do
+  describe "#model" do
     context "when it's a simple attribute" do
       subject{ owner.property :no_model_set }
-      it{ is_expected.to have_attributes(item_model: nil) }
+      it{ is_expected.to have_attributes(model: nil) }
     end
 
     context "when it's an association attribute" do
       subject{ owner.property :set }
-      it{ is_expected.to have_attributes(item_model: Item) }
+      it{ is_expected.to have_attributes(model: Item) }
     end
   end
 

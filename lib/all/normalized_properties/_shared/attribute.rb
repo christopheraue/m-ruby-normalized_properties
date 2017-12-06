@@ -1,6 +1,6 @@
 module NormalizedProperties
   class Attribute < Property
-    def value_model
+    def model
       @config.model
     end
 

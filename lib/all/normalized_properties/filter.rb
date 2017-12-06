@@ -28,28 +28,28 @@ module NormalizedProperties
       end
     end
 
-    def dependencies_resolved(item_model)
+    def dependencies_resolved(model)
       Filter.new @op, *(@parts.map do |part|
         case part
         when Filter
-          part.dependencies_resolved item_model
+          part.dependencies_resolved model
         when Hash
-          hash_dependencies_resolved item_model, part
+          hash_dependencies_resolved model, part
         else
           part
         end
       end)
     end
 
-    def hash_dependencies_resolved(item_model, hash)
+    def hash_dependencies_resolved(model, hash)
       resolved_part = {}
 
       hash.each do |prop_name, prop_filter|
-        resolved_part.merge! item_model.property_config(prop_name).resolve_filter prop_filter
+        resolved_part.merge! model.property_config(prop_name).resolve_filter prop_filter
       end
 
       resolved_part.each do |prop_name, prop_filter|
-        if prop_model = item_model.property_config(prop_name).model
+        if prop_model = model.property_config(prop_name).model
           resolved_part[prop_name] = case prop_filter
                                      when Filter
                                        prop_filter.dependencies_resolved prop_model

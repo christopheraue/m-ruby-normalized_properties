@@ -8,14 +8,14 @@ module NormalizedProperties
     attr_reader :filter
 
     def dependencies_resolved_filter
-      if item_model
-        @filter.dependencies_resolved item_model
+      if model
+        @filter.dependencies_resolved model
       else
         @filter
       end
     end
 
-    def item_model
+    def model
       @config.model
     end
 

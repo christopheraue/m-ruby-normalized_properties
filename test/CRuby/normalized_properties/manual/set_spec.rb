@@ -4,7 +4,7 @@ describe NormalizedProperties::Manual::Set do
       extend NormalizedProperties
 
       attr_accessor :set
-      normalized_set :set, type: 'Manual', item_model: 'Item'
+      normalized_set :set, type: 'Manual', model: 'Item'
 
       attr_accessor :no_model_set
       normalized_set :no_model_set, type: 'Manual'
@@ -17,10 +17,10 @@ describe NormalizedProperties::Manual::Set do
       normalized_attribute :attribute, type: 'Manual'
 
       attr_accessor :association
-      normalized_attribute :association, type: 'Manual', value_model: 'ItemProperty'
+      normalized_attribute :association, type: 'Manual', model: 'ItemProperty'
 
       attr_accessor :set
-      normalized_set :set, type: 'Manual', item_model: 'ItemProperty'
+      normalized_set :set, type: 'Manual', model: 'ItemProperty'
     end)
 
     stub_const('ItemProperty', Class.new do

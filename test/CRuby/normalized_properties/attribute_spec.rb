@@ -10,22 +10,22 @@ describe NormalizedProperties::Attribute do
       normalized_attribute :attribute2, type: 'Manual'
 
       attr_accessor :association
-      normalized_attribute :association, type: 'Manual', value_model: 'PropertyOwner'
+      normalized_attribute :association, type: 'Manual', model: 'PropertyOwner'
     end)
   end
 
   subject(:attribute){ owner.property :attribute }
   let(:owner){ PropertyOwner.new }
 
-  describe "#value_model" do
+  describe "#model" do
     context "when it's a simple attribute" do
       subject{ owner.property :attribute }
-      it{ is_expected.to have_attributes(value_model: nil) }
+      it{ is_expected.to have_attributes(model: nil) }
     end
 
     context "when it's an association attribute" do
       subject{ owner.property :association }
-      it{ is_expected.to have_attributes(value_model: PropertyOwner) }
+      it{ is_expected.to have_attributes(model: PropertyOwner) }
     end
   end
 
