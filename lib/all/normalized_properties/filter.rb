@@ -14,11 +14,11 @@ module NormalizedProperties
       @parts.dup.freeze
     end
 
-    def satisfied_by_instance?(instance)
+    def satisfied_by_model_instance?(instance)
       @parts.__send__(@filter_method) do |part|
         case part
         when Filter
-          part.satisfied_by_instance? instance
+          part.satisfied_by_model_instance? instance
         else
           part.all? do |prop_name, prop_filter|
             instance.property(prop_name).satisfies? prop_filter
@@ -27,11 +27,11 @@ module NormalizedProperties
       end
     end
 
-    def satisfied_by_value?(value)
+    def satisfied_by_object?(value)
       @parts.__send__(@filter_method) do |part|
         case part
         when Filter
-          part.satisfied_by_value? value
+          part.satisfied_by_object? value
         else # simple value
           value == part
         end

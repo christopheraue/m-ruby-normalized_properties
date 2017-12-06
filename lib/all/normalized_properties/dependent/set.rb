@@ -8,9 +8,9 @@ module NormalizedProperties
       def value
         @owner.instance_exec(@config.sources(@owner), &@config.value).select do |item|
           if item_model
-            @filter.satisfied_by_instance? item
+            @filter.satisfied_by_model_instance? item
           else
-            @filter.satisfied_by_value? item
+            @filter.satisfied_by_object? item
           end
         end
       end
@@ -25,7 +25,7 @@ module NormalizedProperties
                    filter
                  end
         filter = filter.and @config.value_filter.call(value) if @config.value_filter
-        Filter.new(:and, @config.sources_filter.call(filter)).satisfied_by_instance? owner
+        Filter.new(:and, @config.sources_filter.call(filter)).satisfied_by_model_instance? owner
       end
     end
   end

@@ -10,20 +10,20 @@ module NormalizedProperties
         when true
           !!value
         when Filter
-          filter.satisfied_by_instance? value
+          filter.satisfied_by_model_instance? value
         when Hash
           filter = Filter.new(:and, filter)
-          filter.satisfied_by_instance? value
+          filter.satisfied_by_model_instance? value
         when Instance
           filter = Filter.new(:and, filter.to_filter)
-          filter.satisfied_by_instance? value
+          filter.satisfied_by_model_instance? value
         else
           false
         end
       else
         case filter
         when Filter
-          filter.satisfied_by_value? value
+          filter.satisfied_by_object? value
         else
           value == filter
         end

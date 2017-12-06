@@ -27,13 +27,13 @@ module NormalizedProperties
         when false
           value.empty?
         when Filter
-          value.any?{ |item| filter.satisfied_by_instance? item }
+          value.any?{ |item| filter.satisfied_by_model_instance? item }
         when Hash
           filter = Filter.new(:and, filter)
-          value.any?{ |item| filter.satisfied_by_instance? item }
+          value.any?{ |item| filter.satisfied_by_model_instance? item }
         when Instance
           filter = Filter.new(:and, filter.to_filter)
-          value.any?{ |item| filter.satisfied_by_instance? item }
+          value.any?{ |item| filter.satisfied_by_model_instance? item }
         else
           false
         end
@@ -44,7 +44,7 @@ module NormalizedProperties
         when false
           value.empty?
         when Filter
-          value.any?{ |item| filter.satisfied_by_value? item }
+          value.any?{ |item| filter.satisfied_by_object? item }
         else
           value.any?{ |item| item == filter }
         end
