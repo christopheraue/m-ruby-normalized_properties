@@ -4,15 +4,12 @@ module NormalizedProperties
 
     def initialize(op, *parts)
       @op = op
-      @parts = parts.map{ |part| (::Hash === part) ? Hash[part] : part }
+      @parts = parts.map{ |part| (::Hash === part) ? Hash[part].freeze : part }.freeze
       @filter_method = OPS[op] or raise "invalid filter op"
+      freeze
     end
 
-    attr_reader :op
-
-    def parts
-      @parts.dup.freeze
-    end
+    attr_reader :op, :parts
 
     def satisfied_by?(object)
       @parts.__send__(@filter_method) do |part|

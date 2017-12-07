@@ -19,7 +19,7 @@ module NormalizedProperties
           end
         end
 
-        resolved
+        resolved.freeze
       end
     end
   end
