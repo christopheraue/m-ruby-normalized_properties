@@ -15,15 +15,11 @@ module NormalizedProperties
     attr_reader :filter
 
     def dependencies_resolved_filter
-      if model
-        @filter.dependencies_resolved model
+      if @model
+        @filter.dependencies_resolved @model
       else
         @filter
       end
-    end
-
-    def model
-      @config.model
     end
 
     def satisfies?(filter)
