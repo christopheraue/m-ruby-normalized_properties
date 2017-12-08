@@ -1,6 +1,12 @@
 module NormalizedProperties
   class Filter
     class Hash < Hash
+      def self.[](hash)
+        mapped = {}
+        hash.each{ |k,v| mapped[k] = (::Hash === v) ? Hash[v].freeze : v }
+        super mapped
+      end
+
       def dependencies_resolved(model)
         resolved = Hash.new
 
