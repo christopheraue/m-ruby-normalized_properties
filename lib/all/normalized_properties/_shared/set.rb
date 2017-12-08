@@ -16,10 +16,6 @@ module NormalizedProperties
       Filter.new self, @filter
     end
 
-    def dependencies_resolved_filter
-      Filter.new self, filter.dependencies_resolved
-    end
-
     def satisfies?(filter)
       case filter
       when true
