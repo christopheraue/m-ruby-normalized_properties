@@ -91,19 +91,7 @@ describe NormalizedProperties::Dependent::Set do
       it{ is_expected.to have_attributes(name: :dependent_set) }
       it{ is_expected.to have_attributes(namespace: NormalizedProperties::Dependent) }
       it{ is_expected.to have_attributes(to_s: "#{owner}#dependent_set") }
-
-      describe "#filter" do
-        subject(:filter){ dependent_set.filter }
-        let(:dependent_set){ owner.property(:dependent_set).where NP.or('item1', 'item2') }
-        it{ is_expected.to have_attributes(op: :and, parts:
-          [have_attributes(op: :or, parts: %w(item1 item2))]) }
-
-        describe "#dependencies_resolved" do
-          subject{ filter.dependencies_resolved }
-          it{ is_expected.to have_attributes(op: :and, parts:
-            [have_attributes(op: :or, parts: %w(item1 item2))]) }
-        end
-      end
+      it{ is_expected.to have_attributes(filter: be_a(NormalizedProperties::Set::Filter)) }
 
       describe "#value" do
         subject{ dependent_set.value }
@@ -289,20 +277,7 @@ describe NormalizedProperties::Dependent::Set do
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :dependent_set) }
       it{ is_expected.to have_attributes(to_s: "#{owner}#dependent_set") }
-
-      describe "#filter" do
-        subject(:filter){ dependent_set.filter }
-        let(:dependent_set){ owner.property(:dependent_set).where\
-          NP.or({attribute: 'attribute1'}, dependent_item2) }
-        it{ is_expected.to have_attributes(op: :and, parts:
-          [have_attributes(op: :or, parts: [{attribute: 'attribute1'}, dependent_item2])]) }
-
-        describe "#dependencies_resolved" do
-          subject{ filter.dependencies_resolved }
-          it{ is_expected.to have_attributes(op: :and, parts:
-            [have_attributes(op: :or, parts: [{item: {attribute: 'attribute1'}}, dependent_item2])]) }
-        end
-      end
+      it{ is_expected.to have_attributes(filter: be_a(NormalizedProperties::Set::Filter)) }
 
       describe "#value" do
         subject{ dependent_set.value }
@@ -615,46 +590,6 @@ describe NormalizedProperties::Dependent::Set do
           context "when the set satisfies the filter" do
             let(:filter){ dependent_item1 }
             it{ is_expected.to be true }
-          end
-        end
-      end
-    end
-
-    describe "filtering a set by dependent properties of its items" do
-      before do
-        class Item
-          normalized_attribute :dependent_attribute, type: 'Dependent', model: 'DependentItem',
-            sources: :attribute,
-            sources_filter: ->(filter){ {attribute: filter} },
-            value: ->(sources){ DependentItem.new sources[:attribute].value }
-
-          normalized_attribute :dependent_dependent_attribute, type: 'Dependent', model: 'ItemProperty',
-            sources: :dependent_attribute,
-            sources_filter: ->(filter){ {dependent_attribute: filter} },
-            value: ->(sources){ sources[:dependent_attribute].value }
-        end
-      end
-
-      describe "#filter" do
-        subject(:filter){ set.filter }
-
-        context "when filtering by a dependent property" do
-          let(:set){ owner.property(:set).where dependent_attribute: 'item2' }
-          it{ is_expected.to have_attributes op: :and, parts: [dependent_attribute: 'item2'] }
-
-          describe "#dependencies_resolved" do
-            subject{ filter.dependencies_resolved }
-            it{ is_expected.to have_attributes op: :and, parts: [attribute: 'item2'] }
-          end
-        end
-
-        context "when filtering by a dependent property depending on another dependent property" do
-          let(:set){ owner.property(:set).where dependent_dependent_attribute: 'item2' }
-          it{ is_expected.to have_attributes op: :and, parts: [dependent_dependent_attribute: 'item2'] }
-
-          describe "#dependencies_resolved" do
-            subject{ filter.dependencies_resolved }
-            it{ is_expected.to have_attributes op: :and, parts: [attribute: 'item2'] }
           end
         end
       end
