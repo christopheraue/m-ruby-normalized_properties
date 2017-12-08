@@ -619,7 +619,7 @@ describe NormalizedProperties::Dependent::Set do
       end
     end
 
-    describe "filtering a set by nested dependent properties" do
+    describe "filtering a set by dependent properties of its items" do
       before do
         class Item
           normalized_attribute :dependent_attribute, type: 'Dependent', model: 'DependentItem',
@@ -634,34 +634,27 @@ describe NormalizedProperties::Dependent::Set do
         end
       end
 
-      let(:item1){ Item.new.tap{ |item| item.attribute = 'item1' } }
-      let(:item2){ Item.new.tap{ |item| item.attribute = 'item2' } }
-      let(:item3){ Item.new.tap{ |item| item.attribute = 'item3' } }
-      before{ owner.set = [item1, item2, item3] }
-
-      context "when the set has not been filtered" do
-        subject{ owner.property :set }
-        it{ is_expected.to have_attributes filter: have_attributes(parts: []) }
-        it{ is_expected.to have_attributes value: [item1, item2, item3] }
-      end
-
-      context "when the set has been filtered" do
-        subject{ owner.property(:set).where filter }
+      describe "#filter" do
+        subject(:filter){ set.filter }
 
         context "when filtering by a dependent property" do
-          let(:filter){ {dependent_attribute: 'item2'} }
-          it{ is_expected.to have_attributes filter: have_attributes(
-            parts: [{dependent_attribute: 'item2'}],
-            dependencies_resolved: have_attributes(parts: [{attribute: 'item2'}])) }
-          it{ is_expected.to have_attributes value: [item2] }
+          let(:set){ owner.property(:set).where dependent_attribute: 'item2' }
+          it{ is_expected.to have_attributes op: :and, parts: [dependent_attribute: 'item2'] }
+
+          describe "#dependencies_resolved" do
+            subject{ filter.dependencies_resolved }
+            it{ is_expected.to have_attributes op: :and, parts: [attribute: 'item2'] }
+          end
         end
 
         context "when filtering by a dependent property depending on another dependent property" do
-          let(:filter){ {dependent_dependent_attribute: 'item2'} }
-          it{ is_expected.to have_attributes filter: have_attributes(
-            parts: [{dependent_dependent_attribute: 'item2'}],
-            dependencies_resolved: have_attributes(parts: [{attribute: 'item2'}])) }
-          it{ is_expected.to have_attributes value: [item2] }
+          let(:set){ owner.property(:set).where dependent_dependent_attribute: 'item2' }
+          it{ is_expected.to have_attributes op: :and, parts: [dependent_dependent_attribute: 'item2'] }
+
+          describe "#dependencies_resolved" do
+            subject{ filter.dependencies_resolved }
+            it{ is_expected.to have_attributes op: :and, parts: [attribute: 'item2'] }
+          end
         end
       end
     end
