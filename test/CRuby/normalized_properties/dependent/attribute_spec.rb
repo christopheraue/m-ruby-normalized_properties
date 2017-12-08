@@ -22,6 +22,7 @@ describe NormalizedProperties::Dependent::Attribute do
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :dependent_attribute) }
+      it{ is_expected.to have_attributes(namespace: NormalizedProperties::Dependent) }
       it{ is_expected.to have_attributes(to_s: "#{owner}#dependent_attribute") }
       it{ is_expected.to have_attributes(value: 'dependent_attribute_value') }
 
@@ -264,6 +265,7 @@ describe NormalizedProperties::Dependent::Attribute do
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :set_dependent) }
+      it{ is_expected.to have_attributes(namespace: NormalizedProperties::Dependent) }
       it{ is_expected.to have_attributes(to_s: "#{owner}#set_dependent") }
       it{ is_expected.to have_attributes(value: DependentObject.new(item2)) }
 

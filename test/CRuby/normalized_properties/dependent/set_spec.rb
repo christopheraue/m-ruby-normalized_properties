@@ -89,6 +89,7 @@ describe NormalizedProperties::Dependent::Set do
 
       it{ is_expected.to have_attributes(owner: owner) }
       it{ is_expected.to have_attributes(name: :dependent_set) }
+      it{ is_expected.to have_attributes(namespace: NormalizedProperties::Dependent) }
       it{ is_expected.to have_attributes(to_s: "#{owner}#dependent_set") }
 
       describe "#filter" do

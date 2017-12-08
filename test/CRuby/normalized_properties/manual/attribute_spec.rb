@@ -15,6 +15,7 @@ describe NormalizedProperties::Manual::Attribute do
 
   it{ is_expected.to have_attributes(owner: owner) }
   it{ is_expected.to have_attributes(name: :attribute) }
+  it{ is_expected.to have_attributes(namespace: NormalizedProperties::Manual) }
   it{ is_expected.to have_attributes(to_s: "#{owner}#attribute") }
   it{ is_expected.to have_attributes(value: 'attribute_value') }
 
