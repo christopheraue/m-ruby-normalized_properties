@@ -21,6 +21,22 @@ module NormalizedProperties
           self
         end
       end
+
+      def partition_by(type)
+        namespace = if NormalizedProperties.const_defined? type
+                      NormalizedProperties.const_get type
+                    else
+                      raise Error, "unknown property type #{type.inspect}"
+                    end
+
+        @filter.partition_by(namespace, @set.namespace, @set.model).map do |part|
+          if part == @filter
+            self
+          else
+            Filter.new @set, part
+          end
+        end
+      end
     end
   end
 end

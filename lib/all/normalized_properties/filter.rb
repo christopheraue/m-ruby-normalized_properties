@@ -43,5 +43,40 @@ module NormalizedProperties
         end
       end)
     end
+
+    def partition_by(namespace, prop_namespace, prop_model)
+      if prop_model
+        type_parts = []
+        other_parts = []
+
+        @parts.each do |part|
+          case part
+          when Filter, Hash
+            tps, ops = part.partition_by namespace, prop_namespace, prop_model
+            type_parts << tps unless tps.noop?
+            other_parts << ops unless ops.noop?
+          else
+            if prop_namespace == namespace and prop_model === part
+              type_parts << part
+            else
+              other_parts << part
+            end
+          end
+        end
+
+        type_filter = Filter.new @op, *type_parts
+        other_filter = Filter.new @op, *other_parts
+      else
+        if prop_namespace == namespace
+          type_filter = self
+          other_filter = Filter.new @op
+        else
+          type_filter = Filter.new @op
+          other_filter = self
+        end
+      end
+
+      [type_filter, other_filter]
+    end
   end
 end
