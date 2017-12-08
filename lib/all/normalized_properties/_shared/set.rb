@@ -3,23 +3,21 @@ module NormalizedProperties
     def initialize(owner, config, filter = {})
       super owner, config
       @filter = case filter
-                when Filter
+                when NormalizedProperties::Filter
                   filter
                 when {}
-                  Filter.new :and
+                  NormalizedProperties::Filter.new :and
                 else
-                  Filter.new :and, filter
+                  NormalizedProperties::Filter.new :and, filter
                 end
     end
 
-    attr_reader :filter
+    def filter
+      Filter.new self, @filter
+    end
 
     def dependencies_resolved_filter
-      if @model
-        @filter.dependencies_resolved @model
-      else
-        @filter
-      end
+      Filter.new self, filter.dependencies_resolved
     end
 
     def satisfies?(filter)
