@@ -7,6 +7,8 @@ module NormalizedProperties
         super mapped
       end
 
+      alias noop? empty?
+
       def dependencies_resolved(model)
         resolved = Hash.new
 

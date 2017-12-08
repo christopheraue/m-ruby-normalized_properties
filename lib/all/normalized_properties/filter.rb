@@ -11,6 +11,14 @@ module NormalizedProperties
 
     attr_reader :op, :parts
 
+    def noop?
+      if @op == :or
+        false # [].any? is false
+      else
+        @parts.empty?
+      end
+    end
+
     def satisfied_by?(object)
       @parts.__send__(@filter_method) do |part|
         object.satisfies? part
