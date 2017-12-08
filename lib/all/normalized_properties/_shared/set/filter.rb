@@ -14,6 +14,10 @@ module NormalizedProperties
         @filter.parts
       end
 
+      def satisfied_by?(object)
+        @filter.satisfied_by? object
+      end
+
       def dependencies_resolved
         if @set.model
           Filter.new @set, @filter.dependencies_resolved(@set.model)

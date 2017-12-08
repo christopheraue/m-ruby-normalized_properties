@@ -20,6 +20,11 @@ describe NormalizedProperties::Set::Filter do
     it{ is_expected.to have_attributes parts: [have_attributes(op: :or, parts: %w(item1 item2))] }
     it{ is_expected.to have_attributes dependencies_resolved: be(set_filter) }
 
+    describe "#satisfied_by?" do
+      subject{ set_filter.satisfied_by? 'item1' }
+      it { is_expected.to be true }
+    end
+
     describe "#partition_by" do
       context "when partitioning by the type of the set" do
         subject{ set_filter.partition_by 'Manual' }
@@ -59,6 +64,11 @@ describe NormalizedProperties::Set::Filter do
         [{attribute: 'attribute1'}, item])] }
       it{ is_expected.to have_attributes dependencies_resolved: have_attributes(op: :and, parts:
         [have_attributes(op: :or, parts: [{attribute: 'attribute1'}, item])]) }
+
+      describe "#satisfied_by?" do
+        subject{ set_filter.satisfied_by? item }
+        it { is_expected.to be true }
+      end
 
       describe "#partition_by" do
         let(:filter) do
