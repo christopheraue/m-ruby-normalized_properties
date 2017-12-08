@@ -42,7 +42,7 @@ module NormalizedProperties
 
     def satisfies?(filter)
       case filter
-      when Filter
+      when Filter, Set::Filter
         filter.satisfied_by? self
       when Hash
         filter.all? do |prop_name, prop_filter|

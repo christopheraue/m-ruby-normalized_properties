@@ -7,7 +7,7 @@ module NormalizedProperties
 
       def value
         @owner.instance_exec(@config.sources(@owner), &@config.value).select do |item|
-          item.satisfies? @filter
+          item.satisfies? filter
         end
       end
 

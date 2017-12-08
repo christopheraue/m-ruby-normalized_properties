@@ -2,19 +2,18 @@ module NormalizedProperties
   class Set < Property
     def initialize(owner, config, filter = {})
       super owner, config
-      @filter = case filter
-                when NormalizedProperties::Filter
-                  filter
-                when {}
-                  NormalizedProperties::Filter.new :and
-                else
-                  NormalizedProperties::Filter.new :and, filter
-                end
+      @no_ctx_filter = case filter
+                       when NormalizedProperties::Filter
+                         filter
+                       when {}
+                         NormalizedProperties::Filter.new :and
+                       else
+                         NormalizedProperties::Filter.new :and, filter
+                       end
+      @filter = Filter.new self, @no_ctx_filter
     end
 
-    def filter
-      Filter.new self, @filter
-    end
+    attr_reader :filter
 
     def satisfies?(filter)
       case filter
@@ -32,7 +31,7 @@ module NormalizedProperties
       when {}, nil
         self
       else
-        self.class.new @owner, @config, @filter.and(filter)
+        self.class.new @owner, @config, @no_ctx_filter.and(filter)
       end
     end
 
