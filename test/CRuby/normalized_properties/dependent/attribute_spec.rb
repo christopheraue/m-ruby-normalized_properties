@@ -253,9 +253,9 @@ describe NormalizedProperties::Dependent::Attribute do
           normalized_set :set, type: 'Manual', model: 'ManualObject'
 
           normalized_attribute :set_dependent, type: 'Dependent', model: 'DependentObject',
-            sources: :set,
+            sources: {set: :value},
             sources_filter: ->(filter){ {set: filter} },
-            value: ->(sources){ DependentObject.new sources[:set].value.find{ |item| item.value == 'item2' } }
+            value: ->(sources){ DependentObject.new sources[:set][:__property__].value.find{ |item| item.value == 'item2' } }
         end
       end
 

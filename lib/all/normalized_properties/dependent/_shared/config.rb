@@ -16,8 +16,13 @@ module NormalizedProperties
         when Hash
           sources.each do |prop_name, prop_sources|
             if prop_owner = owner.property(prop_name).value
-              result[prop_name] = {__self__: (owner.property prop_name)}
-              result[prop_name].merge! sources(prop_owner, prop_sources)
+              result[prop_name] = {__property__: owner.property(prop_name)}
+              case prop_owner
+              when Array
+                result[prop_name].merge! __children__: prop_owner.map{ |o| sources o, prop_sources }
+              else
+                result[prop_name].merge! sources(prop_owner, prop_sources)
+              end
             else
               result[prop_name] = nil
             end
