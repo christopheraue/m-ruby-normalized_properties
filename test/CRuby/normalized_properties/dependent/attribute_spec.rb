@@ -29,13 +29,13 @@ describe NormalizedProperties::Dependent::Attribute do
       describe "watching a change" do
         subject do
           attribute_owner.attribute = 'changed_value'
-          attribute_owner.property(:attribute).changed!
+          attribute_owner.property(:attribute).changed! attribute_owner.attribute
         end
 
         before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
         let(:callback){ proc{} }
 
-        before{ expect(callback).to receive(:call) }
+        before{ expect(callback).to receive(:call).with 'dependent_changed_value' }
         it{ is_expected.not_to raise_error }
         after{ expect(dependent_attribute.value).to eq 'dependent_changed_value' }
       end
@@ -197,7 +197,7 @@ describe NormalizedProperties::Dependent::Attribute do
       describe "watching a change" do
         subject do
           owner.object = changed_object
-          owner.property(:object).changed!
+          owner.property(:object).changed! owner.object
         end
 
         let(:changed_object){ ManualObject.new 'changed_object' }
@@ -205,7 +205,7 @@ describe NormalizedProperties::Dependent::Attribute do
         before{ dependent_attribute.on(:changed){ |*args| callback.call *args } }
         let(:callback){ proc{} }
 
-        before{ expect(callback).to receive(:call) }
+        before{ expect(callback).to receive(:call).with DependentObject.new(changed_object) }
         it{ is_expected.not_to raise_error }
         after{ expect(dependent_attribute.value).to eq DependentObject.new(changed_object) }
       end

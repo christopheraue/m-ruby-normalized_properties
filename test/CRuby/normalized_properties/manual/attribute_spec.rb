@@ -22,13 +22,13 @@ describe NormalizedProperties::Manual::Attribute do
   describe "manual change of the attribute" do
     subject do
       owner.attribute = 'changed_value'
-      owner.property(:attribute).changed!
+      owner.property(:attribute).changed! owner.attribute
     end
 
     before{ attribute.on(:changed){ |*args| callback.call *args } }
     let(:callback){ proc{} }
 
-    before{ expect(callback).to receive(:call) }
+    before{ expect(callback).to receive(:call).with 'changed_value' }
     it{ is_expected.not_to raise_error }
     after{ expect(attribute.value).to eq 'changed_value' }
   end

@@ -21,8 +21,8 @@ module NormalizedProperties
       callback
     end
 
-    def changed!
-      trigger :changed
+    def changed!(value)
+      trigger :changed, value
     end
   end
 end

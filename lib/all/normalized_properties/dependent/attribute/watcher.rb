@@ -5,7 +5,7 @@ module NormalizedProperties
         def trigger_changes
           @previous_value = @value
           @value = @property.value
-          @property.trigger :changed if @value != @previous_value
+          @property.changed! @value if @value != @previous_value
         end
       end
     end
