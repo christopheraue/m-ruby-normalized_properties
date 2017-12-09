@@ -86,6 +86,11 @@ describe NormalizedProperties::Manual::Set do
         context "when one item matches the filter" do
           let(:filter){ 'item2' }
           it{ is_expected.to eq %w(item2) }
+
+          context "when the filter is a regexp" do
+            let(:filter){ /m2$/ }
+            it{ is_expected.to eq %w(item2) }
+          end
         end
 
         context "when multiple items match the filter" do
@@ -123,6 +128,11 @@ describe NormalizedProperties::Manual::Set do
           context "when one item matches the filter" do
             let(:filter){ {attribute: 'attribute2'} }
             it{ is_expected.to eq [item2] }
+
+            context "when the filter is a regexp" do
+              let(:filter){ {attribute: /bute2$/} }
+              it{ is_expected.to eq [item2] }
+            end
           end
 
           context "when multiple items match the filter" do

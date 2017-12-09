@@ -4,7 +4,7 @@ class Object
     when NormalizedProperties::Filter, NormalizedProperties::Set::Filter
       filter.satisfied_by? self
     else
-      self == filter
+      filter === self
     end
   end
 end

@@ -51,7 +51,7 @@ module NormalizedProperties
       when true
         true
       else # Instance
-        self == filter
+        filter === self
       end
     end
   end
